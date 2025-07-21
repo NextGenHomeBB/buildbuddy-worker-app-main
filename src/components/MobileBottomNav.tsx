@@ -1,7 +1,7 @@
 
-import { Home, CheckSquare, Plus, User, Settings } from 'lucide-react'
+import { Home, CheckSquare, User, Settings } from 'lucide-react'
 import { NavLink, useLocation } from 'react-router-dom'
-import { Button } from '@/components/ui/button'
+import { AddTaskDialog } from './AddTaskDialog'
 
 export function MobileBottomNav() {
   const location = useLocation()
@@ -43,13 +43,7 @@ export function MobileBottomNav() {
       </nav>
 
       {/* Floating Action Button - Add Task */}
-      <Button
-        className="lg:hidden fixed bottom-20 right-4 w-14 h-14 rounded-full bg-construction-yellow hover:bg-construction-yellow/90 text-construction-yellow-foreground shadow-lg hover:shadow-xl transition-all duration-200 z-40"
-        size="icon"
-      >
-        <Plus className="w-6 h-6" />
-        <span className="sr-only">Add new task</span>
-      </Button>
+      <AddTaskDialog />
     </>
   )
 }
