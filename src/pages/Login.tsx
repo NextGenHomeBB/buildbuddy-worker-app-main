@@ -46,7 +46,7 @@ export default function Login() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-construction-yellow/10 via-background to-construction-orange/5 flex items-center justify-center px-4 xs:px-6 safe-area-padding">
       {/* Construction-themed background pattern */}
-      <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23f59e0b" fill-opacity="0.03"%3E%3Cpath d="M30 30l15-15v30l-15-15zM15 30l15-15v30l-15-15z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-50"></div>
+      <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%23f59e0b%22%20fill-opacity%3D%220.03%22%3E%3Cpath%20d%3D%22M30%2030l15-15v30l-15-15zM15%2030l15-15v30l-15-15z%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-50"></div>
       
       <Card className="w-full max-w-md relative z-10 shadow-xl border-2 border-construction-yellow/20">
         <CardHeader className="text-center pb-2">
