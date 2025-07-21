@@ -35,8 +35,13 @@ const Index = () => {
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Button size="lg" className="text-lg px-8" asChild>
             <a href="/login">
-              Get Started
+              Sign In
               <ArrowRight className="ml-2 h-5 w-5" />
+            </a>
+          </Button>
+          <Button size="lg" variant="outline" className="text-lg px-8" asChild>
+            <a href="/signup">
+              Sign Up
             </a>
           </Button>
         </div>
