@@ -33,7 +33,9 @@ export function AddTaskDialog({ trigger }: AddTaskDialogProps) {
           description: taskData.description,
           priority: taskData.priority,
           assignee: user?.id,
-          status: 'todo'
+          status: 'todo',
+          // For now, we'll create tasks without a specific project
+          // In a real app, you'd want to associate tasks with projects
         })
         .select()
       
