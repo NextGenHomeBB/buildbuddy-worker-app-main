@@ -30,23 +30,23 @@ export function useUserSetup() {
         }
 
         if (!profile) {
-          // User doesn't have a profile, call the setup function
-          console.log('Setting up user profile and demo data...')
+          // User doesn't have a profile, create one
+          console.log('Creating user profile...')
           
-          const { error: setupError } = await supabase.rpc('setup_demo_data', {
-            manager_id: user.id,
-            worker_id: user.id
+          const { error: setupError } = await supabase.rpc('create_user_profile', {
+            user_id: user.id,
+            user_email: user.email
           })
 
           if (setupError) {
-            console.error('Setup error:', setupError)
+            console.error('Profile creation error:', setupError)
             throw setupError
           }
 
-          console.log('User setup completed successfully')
+          console.log('User profile created successfully')
           toast({
             title: 'Welcome!',
-            description: 'Your account has been set up with demo data.',
+            description: 'Your profile has been created. You can now start creating tasks.',
           })
         }
 

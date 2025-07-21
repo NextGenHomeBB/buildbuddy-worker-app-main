@@ -498,6 +498,10 @@ export type Database = {
       }
     }
     Functions: {
+      create_user_profile: {
+        Args: { user_id: string; user_email?: string }
+        Returns: Json
+      }
       setup_demo_data: {
         Args: { manager_id: string; worker_id: string }
         Returns: Json
