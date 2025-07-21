@@ -452,6 +452,50 @@ export type Database = {
         }
         Relationships: []
       }
+      "worker.my_tasks_view": {
+        Row: {
+          assigned_worker_id: string | null
+          created_at: string | null
+          description: string | null
+          due_date: string | null
+          id: string | null
+          priority: string | null
+          status: string | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          assigned_worker_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          due_date?: never
+          id?: string | null
+          priority?: string | null
+          status?: never
+          title?: string | null
+          updated_at?: never
+        }
+        Update: {
+          assigned_worker_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          due_date?: never
+          id?: string | null
+          priority?: string | null
+          status?: never
+          title?: string | null
+          updated_at?: never
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tasks_assignee_fkey"
+            columns: ["assigned_worker_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       setup_demo_data: {
