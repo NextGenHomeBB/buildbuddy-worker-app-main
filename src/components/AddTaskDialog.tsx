@@ -1,3 +1,4 @@
+
 import { useState } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
@@ -26,20 +27,45 @@ export function AddTaskDialog({ trigger }: AddTaskDialogProps) {
 
   const createTaskMutation = useMutation({
     mutationFn: async (taskData: { title: string; description?: string; priority: string }) => {
+      console.log('Creating task with data:', taskData)
+      console.log('Current user:', user?.id)
+      
+      // First, let's get a project for this user
+      const { data: userProjectRole, error: projectError } = await supabase
+        .from('user_project_role')
+        .select('project_id')
+        .eq('user_id', user?.id)
+        .limit(1)
+        .single()
+
+      if (projectError) {
+        console.error('Project lookup error:', projectError)
+        // If no project found, create task without project initially
+      }
+
+      const taskToInsert = {
+        title: taskData.title,
+        description: taskData.description || null,
+        priority: taskData.priority,
+        assignee: user?.id,
+        status: 'todo',
+        project_id: userProjectRole?.project_id || null,
+        phase_id: null, // We can add phase selection later
+      }
+
+      console.log('Inserting task:', taskToInsert)
+
       const { data, error } = await supabase
         .from('tasks')
-        .insert({
-          title: taskData.title,
-          description: taskData.description,
-          priority: taskData.priority,
-          assignee: user?.id,
-          status: 'todo',
-          // For now, we'll create tasks without a specific project
-          // In a real app, you'd want to associate tasks with projects
-        })
+        .insert(taskToInsert)
         .select()
       
-      if (error) throw error
+      if (error) {
+        console.error('Task creation error:', error)
+        throw error
+      }
+      
+      console.log('Task created successfully:', data)
       return data
     },
     onSuccess: () => {
@@ -59,7 +85,7 @@ export function AddTaskDialog({ trigger }: AddTaskDialogProps) {
       console.error('Task creation error:', error)
       toast({
         title: 'Error',
-        description: 'Failed to create task',
+        description: `Failed to create task: ${error.message}`,
         variant: 'destructive',
       })
     }
@@ -72,6 +98,15 @@ export function AddTaskDialog({ trigger }: AddTaskDialogProps) {
       toast({
         title: 'Error',
         description: 'Task title is required',
+        variant: 'destructive',
+      })
+      return
+    }
+
+    if (!user) {
+      toast({
+        title: 'Error',
+        description: 'You must be logged in to create tasks',
         variant: 'destructive',
       })
       return
