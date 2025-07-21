@@ -1,3 +1,4 @@
+
 import { useState } from 'react'
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
@@ -6,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { useToast } from '@/hooks/use-toast'
+import { HardHat, Wrench } from 'lucide-react'
 
 export default function Login() {
   const [email, setEmail] = useState('')
@@ -42,18 +44,36 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Build-Buddy Worker</CardTitle>
-          <CardDescription>
-            Sign in to access your tasks
+    <div className="min-h-screen bg-gradient-to-br from-construction-yellow/10 via-background to-construction-orange/5 flex items-center justify-center px-4 xs:px-6 safe-area-padding">
+      {/* Construction-themed background pattern */}
+      <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23f59e0b" fill-opacity="0.03"%3E%3Cpath d="M30 30l15-15v30l-15-15zM15 30l15-15v30l-15-15z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-50"></div>
+      
+      <Card className="w-full max-w-md relative z-10 shadow-xl border-2 border-construction-yellow/20">
+        <CardHeader className="text-center pb-2">
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <div className="flex items-center justify-center w-12 h-12 bg-construction-yellow rounded-xl">
+              <HardHat className="w-6 h-6 text-construction-yellow-foreground" />
+            </div>
+            <div className="flex items-center justify-center w-12 h-12 bg-construction-orange rounded-xl">
+              <Wrench className="w-6 h-6 text-construction-orange-foreground" />
+            </div>
+          </div>
+          <CardTitle className="text-2xl xs:text-3xl font-bold text-construction-gray-900">
+            Build-Buddy
+          </CardTitle>
+          <CardDescription className="text-base xs:text-lg text-construction-gray-600">
+            Worker Portal
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+        <CardContent className="pt-2">
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label 
+                htmlFor="email" 
+                className="text-sm font-medium text-construction-gray-700"
+              >
+                Email Address
+              </Label>
               <Input
                 id="email"
                 type="email"
@@ -61,31 +81,52 @@ export default function Login() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                className="h-12 text-base border-2 border-construction-gray-200 focus:border-construction-yellow focus:ring-construction-yellow/20 rounded-lg"
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label 
+                htmlFor="password" 
+                className="text-sm font-medium text-construction-gray-700"
+              >
+                Password
+              </Label>
               <Input
                 id="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                className="h-12 text-base border-2 border-construction-gray-200 focus:border-construction-yellow focus:ring-construction-yellow/20 rounded-lg"
               />
             </div>
 
             <Button 
               type="submit" 
-              className="w-full" 
+              className="w-full h-12 text-base font-semibold bg-construction-yellow hover:bg-construction-yellow/90 text-construction-yellow-foreground rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 touch-target" 
               disabled={loading}
             >
-              {loading ? 'Signing in...' : 'Sign In'}
+              {loading ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-construction-yellow-foreground/30 border-t-construction-yellow-foreground rounded-full animate-spin mr-2" />
+                  Signing In...
+                </>
+              ) : (
+                'Sign In to Start Work'
+              )}
             </Button>
           </form>
 
-          <div className="mt-6 text-center text-sm text-muted-foreground">
-            <p>Use your seeded worker account credentials</p>
+          <div className="mt-8 text-center">
+            <div className="bg-construction-gray-50 rounded-lg p-4 border border-construction-gray-200">
+              <p className="text-sm text-construction-gray-600 font-medium mb-1">
+                Demo Account
+              </p>
+              <p className="text-xs text-construction-gray-500">
+                Use your seeded worker credentials to access the app
+              </p>
+            </div>
           </div>
         </CardContent>
       </Card>
