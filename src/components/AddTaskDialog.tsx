@@ -6,6 +6,9 @@ import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useToast } from '@/hooks/use-toast'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { supabase } from '@/lib/supabase'
+import { useAuth } from '@/contexts/AuthContext'
 import { Plus } from 'lucide-react'
 
 interface AddTaskDialogProps {
@@ -17,8 +20,48 @@ export function AddTaskDialog({ trigger }: AddTaskDialogProps) {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [priority, setPriority] = useState<'low' | 'medium' | 'high'>('medium')
-  const [isSubmitting, setIsSubmitting] = useState(false)
   const { toast } = useToast()
+  const { user } = useAuth()
+  const queryClient = useQueryClient()
+
+  const createTaskMutation = useMutation({
+    mutationFn: async (taskData: { title: string; description?: string; priority: string }) => {
+      const { data, error } = await supabase
+        .from('tasks')
+        .insert({
+          title: taskData.title,
+          description: taskData.description,
+          priority: taskData.priority,
+          assignee: user?.id,
+          status: 'todo'
+        })
+        .select()
+      
+      if (error) throw error
+      return data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['my-tasks'] })
+      toast({
+        title: 'Success',
+        description: 'Task created successfully',
+      })
+      
+      // Reset form and close dialog
+      setTitle('')
+      setDescription('')
+      setPriority('medium')
+      setOpen(false)
+    },
+    onError: (error) => {
+      console.error('Task creation error:', error)
+      toast({
+        title: 'Error',
+        description: 'Failed to create task',
+        variant: 'destructive',
+      })
+    }
+  })
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -32,34 +75,11 @@ export function AddTaskDialog({ trigger }: AddTaskDialogProps) {
       return
     }
 
-    setIsSubmitting(true)
-    
-    try {
-      // TODO: Add actual task creation logic here
-      // This would typically call a mutation to create a task in the database
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      toast({
-        title: 'Success',
-        description: 'Task created successfully',
-      })
-      
-      // Reset form and close dialog
-      setTitle('')
-      setDescription('')
-      setPriority('medium')
-      setOpen(false)
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to create task',
-        variant: 'destructive',
-      })
-    } finally {
-      setIsSubmitting(false)
-    }
+    createTaskMutation.mutate({
+      title: title.trim(),
+      description: description.trim() || undefined,
+      priority
+    })
   }
 
   const defaultTrigger = (
@@ -129,10 +149,10 @@ export function AddTaskDialog({ trigger }: AddTaskDialogProps) {
             </Button>
             <Button
               type="submit"
-              disabled={isSubmitting || !title.trim()}
+              disabled={createTaskMutation.isPending || !title.trim()}
               className="flex-1"
             >
-              {isSubmitting ? 'Creating...' : 'Create Task'}
+              {createTaskMutation.isPending ? 'Creating...' : 'Create Task'}
             </Button>
           </div>
         </form>
