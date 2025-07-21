@@ -1,0 +1,19 @@
+{
+  "name": "Build-Buddy Worker App",
+  "short_name": "BuildBuddy",
+  "description": "Task management app for construction workers",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    }
+  ],
+  "categories": ["productivity", "business"],
+  "lang": "en-US"
+}
