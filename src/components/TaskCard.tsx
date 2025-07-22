@@ -60,7 +60,7 @@ export function TaskCard({ task }: TaskCardProps) {
   const PriorityIcon = getPriorityIcon(task.priority)
 
   return (
-    <Card className="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-brandBlue">
+    <Card data-testid="task-card" className="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-brandBlue">
       <CardContent className="p-4">
         <div className="flex items-start justify-between">
           <div className="flex items-start space-x-3 flex-1">

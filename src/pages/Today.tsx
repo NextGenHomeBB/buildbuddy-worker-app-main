@@ -94,7 +94,7 @@ export default function Today() {
       {/* Welcome Section */}
       <div className="px-4 py-6">
         <div className="space-y-1">
-          <h2 className="text-2xl font-medium text-gray-900 truncate max-w-[240px]">
+          <h2 data-testid="greeting-header" className="text-2xl font-medium text-gray-900 truncate max-w-[240px] cursor-pointer hover:text-blue-600 transition-colors" onClick={() => window.location.href = '/profile'}>
             Hi, {username.charAt(0).toUpperCase() + username.slice(1)}
           </h2>
           <p className="text-gray-500">
