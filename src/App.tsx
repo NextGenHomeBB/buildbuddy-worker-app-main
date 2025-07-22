@@ -1,4 +1,5 @@
 
+import { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -14,6 +15,7 @@ import Today from "./pages/Today";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
+import { registerOnlineListener } from "@/lib/offlineQueue";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -24,7 +26,20 @@ const queryClient = new QueryClient({
   },
 });
 
-const App = () => (
+const App = () => {
+  useEffect(() => {
+    // Register PWA service worker
+    if ('serviceWorker' in navigator) {
+      import('virtual:pwa-register').then(({ registerSW }) => {
+        registerSW()
+      })
+    }
+    
+    // Register online/offline listeners for mutation queue
+    registerOnlineListener()
+  }, [])
+
+  return (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <UserSetupProvider>
@@ -64,6 +79,7 @@ const App = () => (
       </UserSetupProvider>
     </AuthProvider>
   </QueryClientProvider>
-);
+  )
+};
 
 export default App;
