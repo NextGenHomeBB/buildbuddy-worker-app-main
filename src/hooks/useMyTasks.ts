@@ -25,8 +25,8 @@ export function useMyTasks() {
   })
 
   const updateTaskStatus = useMutation({
-    mutationFn: async ({ taskId, status }: { taskId: string; status: 'todo' | 'done' }) => {
-      const patch = { status, updated_at: new Date().toISOString() }
+    mutationFn: async ({ taskId, status }: { taskId: string; status: WorkerTask['status'] }) => {
+      const patch = { status: status === 'completed' ? 'done' : 'todo', updated_at: new Date().toISOString() }
       
       if (!navigator.onLine) {
         // Queue the mutation for when we come back online
@@ -71,7 +71,7 @@ export function useMyTasks() {
         queryClient.invalidateQueries({ queryKey: ['my-tasks'] })
         toast({
           title: 'Task Updated',
-          description: `Task marked as ${status === 'done' ? 'completed' : 'todo'}`,
+          description: `Task marked as ${status === 'completed' ? 'completed' : 'pending'}`,
         })
       }
     },

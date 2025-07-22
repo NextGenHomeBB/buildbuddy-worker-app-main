@@ -14,7 +14,7 @@ export function TaskCard({ task }: TaskCardProps) {
   const { updateTaskStatus, isUpdating } = useMyTasks()
 
   const handleStatusChange = (checked: boolean) => {
-    const newStatus = checked ? 'done' : 'todo'
+    const newStatus = checked ? 'completed' : 'pending'
     updateTaskStatus({ taskId: task.id, status: newStatus })
   }
 
@@ -66,17 +66,17 @@ export function TaskCard({ task }: TaskCardProps) {
           <div className="flex items-start space-x-3 flex-1">
             <label className="p-2 cursor-pointer">
               <Checkbox
-                checked={task.status === 'done'}
+                checked={task.status === 'completed'}
                 onCheckedChange={handleStatusChange}
                 disabled={isUpdating}
                 className="border-2 border-gray-300 data-[state=checked]:bg-blue-500 data-[state=checked]:border-blue-500 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brandBlue"
               />
-              <span className="sr-only">Mark task as {task.status === 'done' ? 'incomplete' : 'complete'}</span>
+              <span className="sr-only">Mark task as {task.status === 'completed' ? 'incomplete' : 'complete'}</span>
             </label>
             
             <div className="flex-1 min-w-0">
               <h3 className={`font-medium text-gray-900 mb-1 ${
-                task.status === 'done' ? 'line-through text-gray-500' : ''
+                task.status === 'completed' ? 'line-through text-gray-500' : ''
               }`}>
                 {task.title}
               </h3>
