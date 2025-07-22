@@ -69,7 +69,7 @@ export function TaskCard({ task }: TaskCardProps) {
                 checked={task.status === 'completed'}
                 onCheckedChange={handleStatusChange}
                 disabled={isUpdating}
-                className="border-2 border-gray-300 data-[state=checked]:bg-blue-500 data-[state=checked]:border-blue-500 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brandBlue"
+                className="rounded-full border-2 border-gray-300 data-[state=checked]:bg-green-500 data-[state=checked]:border-green-500 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-green-500"
               />
               <span className="sr-only">Mark task as {task.status === 'completed' ? 'incomplete' : 'complete'}</span>
             </label>
