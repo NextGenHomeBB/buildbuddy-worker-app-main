@@ -64,14 +64,15 @@ export function TaskCard({ task }: TaskCardProps) {
       <CardContent className="p-4">
         <div className="flex items-start justify-between">
           <div className="flex items-start space-x-3 flex-1">
-            <div className="p-2">
+            <label className="p-2 cursor-pointer">
               <Checkbox
                 checked={task.status === 'completed'}
                 onCheckedChange={handleStatusChange}
                 disabled={isUpdating}
                 className="border-2 border-gray-300 data-[state=checked]:bg-blue-500 data-[state=checked]:border-blue-500 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brandBlue"
               />
-            </div>
+              <span className="sr-only">Mark task as {task.status === 'completed' ? 'incomplete' : 'complete'}</span>
+            </label>
             
             <div className="flex-1 min-w-0">
               <h3 className={`font-medium text-gray-900 mb-1 ${
