@@ -9,7 +9,7 @@ export interface WorkerTask {
   id: string
   title: string
   description?: string
-  status: 'pending' | 'in_progress' | 'completed'
+  status: 'todo' | 'done'
   priority: 'low' | 'medium' | 'high'
   assigned_worker_id: string
   created_at: string

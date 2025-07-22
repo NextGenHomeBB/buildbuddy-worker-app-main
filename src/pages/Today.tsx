@@ -38,7 +38,7 @@ export default function Today() {
     )
   }
 
-  const completedTasks = tasks.filter(t => t.status === 'completed').length
+  const completedTasks = tasks.filter(t => t.status === 'done').length
   const totalTasks = tasks.length
   const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0
 

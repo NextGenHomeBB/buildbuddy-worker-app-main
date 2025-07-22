@@ -25,7 +25,7 @@ export function useMyTasks() {
   })
 
   const updateTaskStatus = useMutation({
-    mutationFn: async ({ taskId, status }: { taskId: string; status: WorkerTask['status'] }) => {
+    mutationFn: async ({ taskId, status }: { taskId: string; status: 'todo' | 'done' }) => {
       const patch = { status, updated_at: new Date().toISOString() }
       
       if (!navigator.onLine) {
@@ -71,7 +71,7 @@ export function useMyTasks() {
         queryClient.invalidateQueries({ queryKey: ['my-tasks'] })
         toast({
           title: 'Task Updated',
-          description: `Task status changed to ${status.replace('_', ' ')}`,
+          description: `Task marked as ${status === 'done' ? 'completed' : 'todo'}`,
         })
       }
     },
