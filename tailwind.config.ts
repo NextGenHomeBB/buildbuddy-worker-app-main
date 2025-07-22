@@ -101,7 +101,12 @@ export default {
 						800: 'hsl(var(--construction-gray-800))',
 						900: 'hsl(var(--construction-gray-900))',
 					}
-				}
+				},
+				brandBlue: '217 100% 50%'
+			},
+			ringColor: {
+				DEFAULT: 'hsl(var(--ring))',
+				brandBlue: 'hsl(217 100% 50%)',
 			},
 			spacing: {
 				'safe-top': 'env(safe-area-inset-top)',

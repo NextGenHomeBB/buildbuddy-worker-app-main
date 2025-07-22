@@ -52,7 +52,7 @@ export default function Today() {
           <div className="flex items-center justify-between">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="p-2">
+                <Button variant="ghost" size="sm" className="p-2 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brandBlue">
                   <Menu className="h-5 w-5 text-gray-600" />
                 </Button>
               </DropdownMenuTrigger>
@@ -93,15 +93,17 @@ export default function Today() {
 
       {/* Welcome Section */}
       <div className="px-4 py-6">
-        <h2 className="text-2xl font-medium text-gray-900 mb-2">
-          Hi, {username.charAt(0).toUpperCase() + username.slice(1)}
-        </h2>
-        <p className="text-gray-500 mb-4">
-          {completedTasks} of {totalTasks} tasks completed
-        </p>
+        <div className="space-y-1">
+          <h2 className="text-2xl font-medium text-gray-900 truncate max-w-[240px]">
+            Hi, {username.charAt(0).toUpperCase() + username.slice(1)}
+          </h2>
+          <p className="text-gray-500">
+            {completedTasks} of {totalTasks} tasks completed
+          </p>
+        </div>
         
         {/* Progress Bar */}
-        <div className="w-full bg-gray-100 rounded-full h-2 mb-6">
+        <div className="w-full bg-gray-100 rounded-full h-2 mt-4 mb-6">
           <div 
             className="bg-blue-500 h-2 rounded-full transition-all duration-500"
             style={{ width: `${completionRate}%` }}
