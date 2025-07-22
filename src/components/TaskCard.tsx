@@ -53,7 +53,7 @@ export function TaskCard({ task }: TaskCardProps) {
               checked={task.status === 'completed'}
               onCheckedChange={handleStatusChange}
               disabled={isUpdating}
-              className="mt-1 h-5 w-5 border-2 border-gray-300 data-[state=checked]:bg-blue-500 data-[state=checked]:border-blue-500"
+              className="mt-1 w-touch-target h-touch-target min-w-touch-target min-h-touch-target border-2 border-gray-300 data-[state=checked]:bg-blue-500 data-[state=checked]:border-blue-500"
             />
             
             <div className="flex-1 min-w-0">
