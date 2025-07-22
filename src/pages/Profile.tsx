@@ -3,14 +3,78 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { MobileBottomNav } from '@/components/MobileBottomNav'
-import { User, Mail, Calendar, Building } from 'lucide-react'
+import { User, Mail, Calendar, Building, Edit, Save, X } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { supabase } from '@/lib/supabase'
+import { useToast } from '@/hooks/use-toast'
 
 export default function Profile() {
   const { user, signOut } = useAuth()
+  const { toast } = useToast()
+  const [isEditing, setIsEditing] = useState(false)
+  const [fullName, setFullName] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!user) return
+      
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('id', user.id)
+        .single()
+      
+      if (profile) {
+        setFullName(profile.full_name || '')
+      }
+    }
+    
+    fetchProfile()
+  }, [user])
 
   const handleSignOut = async () => {
     await signOut()
+  }
+
+  const handleSaveProfile = async () => {
+    if (!user) return
+    
+    setIsLoading(true)
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .upsert({
+          id: user.id,
+          full_name: fullName
+        })
+      
+      if (error) throw error
+      
+      setIsEditing(false)
+      toast({
+        title: 'Profile updated',
+        description: 'Your name has been updated successfully.',
+      })
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to update profile. Please try again.',
+        variant: 'destructive',
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleCancelEdit = () => {
+    setIsEditing(false)
+    // Reset to original value
+    const originalName = user?.user_metadata?.full_name || ''
+    setFullName(originalName)
   }
 
   return (
@@ -43,6 +107,47 @@ export default function Profile() {
             </Badge>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* Editable Name Field */}
+            <div className="space-y-2">
+              <Label htmlFor="fullName" className="text-sm font-medium">Full Name</Label>
+              {isEditing ? (
+                <div className="flex gap-2">
+                  <Input
+                    id="fullName"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    placeholder="Enter your full name"
+                    className="flex-1"
+                  />
+                  <Button
+                    size="sm"
+                    onClick={handleSaveProfile}
+                    disabled={isLoading}
+                  >
+                    <Save className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={handleCancelEdit}
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between p-2 border rounded-md">
+                  <span className="text-foreground">{fullName || 'No name set'}</span>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => setIsEditing(true)}
+                  >
+                    <Edit className="w-4 h-4" />
+                  </Button>
+                </div>
+              )}
+            </div>
+            
             <div className="flex items-center gap-3 text-muted-foreground">
               <Mail className="w-4 h-4" />
               <span>{user?.email}</span>
