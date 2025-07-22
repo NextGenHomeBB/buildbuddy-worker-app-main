@@ -18,9 +18,9 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 240 10% 3.9%;
 
-    /* Industrial Construction Theme - Primary is construction yellow */
-    --primary: 45 93% 47%; /* Construction Yellow */
-    --primary-foreground: 240 10% 3.9%;
+    /* Clean minimal theme - Primary is blue */
+    --primary: 217 91% 60%; /* Blue */
+    --primary-foreground: 0 0% 100%;
 
     --secondary: 240 4.8% 95.9%;
     --secondary-foreground: 240 5.9% 10%;
@@ -36,14 +36,14 @@ All colors MUST be HSL.
 
     --border: 240 5.9% 90%;
     --input: 240 5.9% 90%;
-    --ring: 45 93% 47%; /* Construction Yellow for focus rings */
+    --ring: 217 91% 60%; /* Blue for focus rings */
 
     --radius: 0.5rem;
 
-    /* Construction Theme Colors */
-    --construction-yellow: 45 93% 47%; /* #F59E0B equivalent */
+    /* Construction Theme Colors - keeping for compatibility */
+    --construction-yellow: 45 93% 47%;
     --construction-yellow-foreground: 240 10% 3.9%;
-    --construction-orange: 24 95% 53%; /* #EA580C equivalent */
+    --construction-orange: 24 95% 53%;
     --construction-orange-foreground: 0 0% 98%;
     
     /* Construction Gray Scale */
@@ -78,8 +78,8 @@ All colors MUST be HSL.
     --popover: 240 10% 3.9%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 45 93% 47%; /* Keep construction yellow in dark mode */
-    --primary-foreground: 240 10% 3.9%;
+    --primary: 217 91% 60%; /* Keep blue in dark mode */
+    --primary-foreground: 0 0% 100%;
 
     --secondary: 240 3.7% 15.9%;
     --secondary-foreground: 0 0% 98%;
@@ -95,9 +95,9 @@ All colors MUST be HSL.
 
     --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
-    --ring: 45 93% 47%; /* Construction Yellow for focus rings */
+    --ring: 217 91% 60%; /* Blue for focus rings */
 
-    /* Construction colors remain the same in dark mode for brand consistency */
+    /* Construction colors remain the same in dark mode for compatibility */
     --construction-yellow: 45 93% 47%;
     --construction-yellow-foreground: 240 10% 3.9%;
     --construction-orange: 24 95% 53%;
@@ -148,12 +148,11 @@ All colors MUST be HSL.
     padding-right: env(safe-area-inset-right);
   }
 
-  /* Swipe gesture utilities */
-  .swipe-container {
-    @apply overflow-hidden relative;
-  }
-  
-  .swipe-content {
-    @apply transition-transform duration-200 ease-out;
+  /* Text truncation utilities */
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 }
