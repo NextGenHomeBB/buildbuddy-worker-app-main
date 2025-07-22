@@ -64,7 +64,7 @@ export default function Today() {
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex flex-col space-y-1 leading-none">
-                    <p className="font-medium text-sm">{user?.email}</p>
+                    <p className="font-medium text-sm">{username}</p>
                   </div>
                 </div>
                 <DropdownMenuSeparator />
