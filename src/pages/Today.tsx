@@ -103,7 +103,7 @@ export default function Today() {
         </div>
         
         {/* Progress Bar */}
-        <div className="w-full bg-gray-100 rounded-full h-2 mt-4 mb-6">
+        <div className="w-full bg-gray-100 rounded-full h-2 mt-1 mb-6">
           <div 
             className="bg-blue-500 h-2 rounded-full transition-all duration-500"
             style={{ width: `${completionRate}%` }}

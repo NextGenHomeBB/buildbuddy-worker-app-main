@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import { WorkerTask } from '@/lib/supabase'
 import { useMyTasks } from '@/hooks/useMyTasks'
-import { ArrowRight, AlertTriangle, Minus } from 'lucide-react'
+import { ArrowRight, AlertTriangle, Minus, Circle } from 'lucide-react'
 
 interface TaskCardProps {
   task: WorkerTask
@@ -51,7 +51,7 @@ export function TaskCard({ task }: TaskCardProps) {
       case 'medium':
         return Minus
       case 'low':
-        return Minus
+        return Circle
       default:
         return Minus
     }

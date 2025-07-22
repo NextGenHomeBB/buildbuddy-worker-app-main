@@ -25,7 +25,7 @@ export function MobileBottomNav() {
               <NavLink
                 key={item.path}
                 to={item.path}
-                className={`flex flex-col items-center justify-center min-h-[56px] min-w-[60px] rounded-lg transition-colors ${
+                className={`flex flex-col items-center justify-center min-h-[56px] min-w-[60px] rounded-lg transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brandBlue ${
                   isActive 
                     ? 'text-blue-500' 
                     : 'text-gray-400 hover:text-gray-600'

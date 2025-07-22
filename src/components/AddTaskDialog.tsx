@@ -121,7 +121,7 @@ export function AddTaskDialog({ trigger }: AddTaskDialogProps) {
 
   const defaultTrigger = (
     <Button
-      className="lg:hidden fixed bottom-20 right-4 w-14 h-14 rounded-full bg-construction-yellow hover:bg-construction-yellow/90 text-construction-yellow-foreground shadow-lg hover:shadow-xl transition-all duration-200 z-40"
+      className="lg:hidden fixed bottom-20 right-4 w-14 h-14 rounded-full bg-construction-yellow hover:bg-construction-yellow/90 text-construction-yellow-foreground shadow-lg hover:shadow-xl transition-all duration-200 z-40 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brandBlue"
       size="icon"
     >
       <Plus className="w-6 h-6" />
