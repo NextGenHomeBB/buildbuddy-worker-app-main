@@ -188,7 +188,11 @@ export default function Projects() {
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {projects?.map((project) => (
-              <Card key={project.id} className="hover:shadow-md transition-shadow">
+              <Card 
+                key={project.id} 
+                className="hover:shadow-md transition-shadow cursor-pointer hover:scale-[1.02] transition-transform"
+                onClick={() => navigate(`/projects/${project.id}`)}
+              >
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div className="space-y-1">
