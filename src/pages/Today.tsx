@@ -1,4 +1,5 @@
 
+import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useMyTasks } from '@/hooks/useMyTasks'
 import { TaskCard } from '@/components/TaskCard'
@@ -8,10 +9,40 @@ import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { LogOut, Calendar, User, Settings, Menu, ArrowRight } from 'lucide-react'
+import { supabase } from '@/lib/supabase'
 
 export default function Today() {
   const { user, signOut } = useAuth()
   const { tasks, isLoading, error } = useMyTasks()
+  const [profileName, setProfileName] = useState<string>('')
+
+  // Fetch user profile name
+  useEffect(() => {
+    const fetchProfileName = async () => {
+      if (!user) return
+
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('full_name')
+          .eq('id', user.id)
+          .single()
+
+        if (error) {
+          console.error('Error fetching profile:', error)
+          return
+        }
+
+        if (data?.full_name) {
+          setProfileName(data.full_name)
+        }
+      } catch (error) {
+        console.error('Error fetching profile name:', error)
+      }
+    }
+
+    fetchProfileName()
+  }, [user])
 
   const handleSignOut = async () => {
     await signOut()
@@ -43,7 +74,8 @@ export default function Today() {
   const totalTasks = tasks.length
   const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0
 
-  const username = user?.email?.split('@')[0] || 'User'
+  // Use profile name if available, otherwise fallback to email username
+  const displayName = profileName || user?.email?.split('@')[0] || 'User'
 
   return (
     <div className="min-h-screen bg-white pb-20 lg:pb-0">
@@ -65,7 +97,7 @@ export default function Today() {
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex flex-col space-y-1 leading-none">
-                    <p className="font-medium text-sm">{username}</p>
+                    <p className="font-medium text-sm">{displayName}</p>
                   </div>
                 </div>
                 <DropdownMenuSeparator />
@@ -96,7 +128,7 @@ export default function Today() {
       <div className="px-4 py-6">
         <div className="space-y-1">
           <h2 data-testid="greeting-header" className="text-2xl font-medium text-gray-900 truncate max-w-[240px] cursor-pointer hover:text-blue-600 transition-colors" onClick={() => window.location.href = '/profile'}>
-            Hi, {username.charAt(0).toUpperCase() + username.slice(1)}
+            Hi, {displayName.charAt(0).toUpperCase() + displayName.slice(1)}
           </h2>
           <p className="text-gray-500">
             {completedTasks} of {totalTasks} tasks completed
