@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
+import { MobileBottomNav } from '@/components/MobileBottomNav'
 import { Briefcase, Calendar, Users, MapPin, ArrowLeft } from 'lucide-react'
 
 interface Project {
@@ -49,6 +50,7 @@ export default function Projects() {
             ))}
           </div>
         </div>
+        <MobileBottomNav />
       </div>
     )
   }
@@ -64,6 +66,7 @@ export default function Projects() {
             </CardDescription>
           </CardHeader>
         </Card>
+        <MobileBottomNav />
       </div>
     )
   }
@@ -184,6 +187,8 @@ export default function Projects() {
           </div>
         )}
       </div>
+
+      <MobileBottomNav />
     </div>
   )
 }
