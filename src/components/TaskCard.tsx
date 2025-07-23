@@ -5,12 +5,14 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { WorkerTask } from '@/lib/supabase'
 import { useMyTasks } from '@/hooks/useMyTasks'
 import { ArrowRight, AlertTriangle, Minus, Circle } from 'lucide-react'
+import { format } from 'date-fns'
 
 interface TaskCardProps {
   task: WorkerTask
+  showDueDate?: boolean
 }
 
-export function TaskCard({ task }: TaskCardProps) {
+export function TaskCard({ task, showDueDate = false }: TaskCardProps) {
   const { updateTaskStatus, isUpdating } = useMyTasks()
 
   const handleStatusChange = (checked: boolean) => {
@@ -94,9 +96,15 @@ export function TaskCard({ task }: TaskCardProps) {
                   <span className="sr-only">{task.priority} priority</span>
                 </div>
                 
-                <span className="text-xs text-gray-400">
-                  Project Task
-                </span>
+                {showDueDate && task.due_date ? (
+                  <span className="text-xs text-gray-500">
+                    Due: {format(new Date(task.due_date), 'MMM d, yyyy')}
+                  </span>
+                ) : (
+                  <span className="text-xs text-gray-400">
+                    Project Task
+                  </span>
+                )}
               </div>
             </div>
           </div>

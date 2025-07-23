@@ -12,6 +12,7 @@ import Index from "./pages/Index";
 import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
 import Today from "./pages/Today";
+import Calendar from "./pages/Calendar";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
@@ -59,6 +60,11 @@ const App = () => {
               <Route path="/tasks" element={
                 <RequireAuth>
                   <Today />
+                </RequireAuth>
+              } />
+              <Route path="/calendar" element={
+                <RequireAuth>
+                  <Calendar />
                 </RequireAuth>
               } />
               <Route path="/profile" element={
