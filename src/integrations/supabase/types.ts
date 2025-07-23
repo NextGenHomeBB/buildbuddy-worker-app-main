@@ -38,6 +38,38 @@ export type Database = {
         }
         Relationships: []
       }
+      checklist_templates: {
+        Row: {
+          created_at: string | null
+          id: string
+          label: string
+          phase_template_id: string | null
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          label: string
+          phase_template_id?: string | null
+          sort_order: number
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          label?: string
+          phase_template_id?: string | null
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "checklist_templates_phase_template_id_fkey"
+            columns: ["phase_template_id"]
+            isOneToOne: false
+            referencedRelation: "phase_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       companies: {
         Row: {
           created_at: string | null
@@ -83,6 +115,30 @@ export type Database = {
           supplier?: string | null
           unit?: string | null
           unit_cost?: number | null
+        }
+        Relationships: []
+      }
+      phase_templates: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          sort_order: number
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          sort_order?: number
         }
         Relationships: []
       }
@@ -504,6 +560,10 @@ export type Database = {
       create_user_profile: {
         Args: { user_id: string; user_email?: string }
         Returns: Json
+      }
+      get_current_user_role: {
+        Args: Record<PropertyKey, never>
+        Returns: string
       }
       setup_demo_data: {
         Args: { manager_id: string; worker_id: string }
