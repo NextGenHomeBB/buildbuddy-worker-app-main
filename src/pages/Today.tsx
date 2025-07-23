@@ -26,7 +26,7 @@ export default function Today() {
           .from('profiles')
           .select('full_name')
           .eq('id', user.id)
-          .single()
+          .maybeSingle()
 
         if (error) {
           console.error('Error fetching profile:', error)
@@ -35,6 +35,8 @@ export default function Today() {
 
         if (data?.full_name) {
           setProfileName(data.full_name)
+        } else {
+          console.log('No profile found for user:', user.id)
         }
       } catch (error) {
         console.error('Error fetching profile name:', error)
