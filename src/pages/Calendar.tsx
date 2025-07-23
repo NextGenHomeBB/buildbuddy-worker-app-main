@@ -32,29 +32,54 @@ export default function CalendarPage() {
           <p className="text-muted-foreground mt-2">View and manage your tasks by date</p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
           {/* Calendar Section */}
           <Card>
             <CardHeader>
-              <CardTitle>Select a Date</CardTitle>
+              <CardTitle className="text-lg md:text-xl">Select a Date</CardTitle>
             </CardHeader>
-            <CardContent>
-              <Calendar
-                mode="single"
-                selected={selectedDate}
-                onSelect={setSelectedDate}
-                className="rounded-md border"
-                modifiers={{
-                  hasTasks: taskDates,
-                }}
-                modifiersStyles={{
-                  hasTasks: {
-                    backgroundColor: 'hsl(var(--primary))',
-                    color: 'hsl(var(--primary-foreground))',
-                    borderRadius: '50%',
-                  },
-                }}
-              />
+            <CardContent className="flex justify-center p-3 sm:p-6">
+              <div className="w-full max-w-sm">
+                <Calendar
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={setSelectedDate}
+                  className="rounded-md border shadow-sm bg-background w-full mx-auto"
+                  classNames={{
+                    months: "flex flex-col space-y-4 w-full",
+                    month: "space-y-4 w-full",
+                    caption: "flex justify-center pt-1 relative items-center text-sm font-medium",
+                    caption_label: "text-sm font-medium",
+                    nav: "space-x-1 flex items-center",
+                    nav_button: "h-8 w-8 bg-transparent p-0 opacity-50 hover:opacity-100 rounded-md hover:bg-accent transition-opacity",
+                    nav_button_previous: "absolute left-1",
+                    nav_button_next: "absolute right-1",
+                    table: "w-full border-collapse space-y-1",
+                    head_row: "flex w-full",
+                    head_cell: "text-muted-foreground rounded-md font-normal text-xs sm:text-sm flex-1 text-center p-1",
+                    row: "flex w-full mt-1 sm:mt-2",
+                    cell: "text-center text-xs sm:text-sm p-0 relative flex-1 [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
+                    day: "h-8 sm:h-9 w-full p-0 font-normal aria-selected:opacity-100 rounded-md hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground transition-colors",
+                    day_selected: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
+                    day_today: "bg-accent text-accent-foreground font-semibold",
+                    day_outside: "text-muted-foreground opacity-50",
+                    day_disabled: "text-muted-foreground opacity-50",
+                    day_range_middle: "aria-selected:bg-accent aria-selected:text-accent-foreground",
+                    day_hidden: "invisible",
+                  }}
+                  modifiers={{
+                    hasTasks: taskDates,
+                  }}
+                  modifiersStyles={{
+                    hasTasks: {
+                      backgroundColor: 'hsl(var(--primary))',
+                      color: 'hsl(var(--primary-foreground))',
+                      borderRadius: '50%',
+                      fontWeight: 'bold',
+                    },
+                  }}
+                />
+              </div>
             </CardContent>
           </Card>
 
