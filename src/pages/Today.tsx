@@ -3,6 +3,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useMyTasks } from '@/hooks/useMyTasks'
 import { TaskCard } from '@/components/TaskCard'
 import { MobileBottomNav } from '@/components/MobileBottomNav'
+import { ShiftTracker } from '@/components/ShiftTracker'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
@@ -109,6 +110,11 @@ export default function Today() {
             style={{ width: `${completionRate}%` }}
           />
         </div>
+      </div>
+
+      {/* Shift Tracker Section */}
+      <div className="px-4 mb-6">
+        <ShiftTracker />
       </div>
 
       {/* Tasks Section */}
