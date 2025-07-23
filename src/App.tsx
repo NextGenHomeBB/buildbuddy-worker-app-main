@@ -13,6 +13,7 @@ import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
 import Today from "./pages/Today";
 import Calendar from "./pages/Calendar";
+import Projects from "./pages/Projects";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
@@ -65,6 +66,11 @@ const App = () => {
               <Route path="/calendar" element={
                 <RequireAuth>
                   <Calendar />
+                </RequireAuth>
+              } />
+              <Route path="/projects" element={
+                <RequireAuth>
+                  <Projects />
                 </RequireAuth>
               } />
               <Route path="/profile" element={
