@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { useMyTasks } from '@/hooks/useMyTasks'
 import { TaskCard } from '@/components/TaskCard'
@@ -15,6 +16,7 @@ export default function Today() {
   const { user, signOut } = useAuth()
   const { tasks, isLoading, error } = useMyTasks()
   const [profileName, setProfileName] = useState<string>('')
+  const navigate = useNavigate()
 
   // Fetch user profile name
   useEffect(() => {
@@ -103,11 +105,11 @@ export default function Today() {
                   </div>
                 </div>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/profile')}>
                   <User className="h-4 w-4 mr-2" />
                   Profile
                 </DropdownMenuItem>
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/settings')}>
                   <Settings className="h-4 w-4 mr-2" />
                   Settings
                 </DropdownMenuItem>
