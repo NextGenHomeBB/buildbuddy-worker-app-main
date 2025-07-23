@@ -5,6 +5,11 @@ import { AddTaskDialog } from './AddTaskDialog'
 export function MobileBottomNav() {
   const location = useLocation()
 
+  // Hide on projects page
+  if (location.pathname === '/projects') {
+    return null
+  }
+
   const navItems = [
     { icon: Home, label: 'Today', path: '/today' },
     { icon: Calendar, label: 'Calendar', path: '/calendar' },
