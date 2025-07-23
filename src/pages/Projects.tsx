@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
+import { useAuth } from '@/contexts/AuthContext'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
@@ -23,17 +24,48 @@ interface Project {
 
 export default function Projects() {
   const navigate = useNavigate()
+  const { user } = useAuth()
+  
   const { data: projects, isLoading, error } = useQuery({
     queryKey: ['projects'],
     queryFn: async () => {
+      console.log('Fetching projects for user:', user?.id)
+      
+      // First, let's check what user_project_role entries exist for this user
+      const { data: userRoles, error: rolesError } = await supabase
+        .from('user_project_role')
+        .select('*')
+        .eq('user_id', user?.id)
+      
+      console.log('User project roles:', userRoles)
+      if (rolesError) console.error('Error fetching user roles:', rolesError)
+      
+      // Also check the user's profile
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user?.id)
+        .single()
+      
+      console.log('User profile:', profile)
+      if (profileError) console.error('Error fetching profile:', profileError)
+
       const { data, error } = await supabase
         .from('projects')
         .select('*')
         .order('created_at', { ascending: false })
 
-      if (error) throw error
+      console.log('Projects query result:', { data, error })
+      
+      if (error) {
+        console.error('Projects query error:', error)
+        throw error
+      }
+      
+      console.log('Projects returned:', data?.length || 0)
       return data as Project[]
     },
+    enabled: !!user, // Only run query if user is available
   })
 
   if (isLoading) {
@@ -56,15 +88,22 @@ export default function Projects() {
   }
 
   if (error) {
+    console.error('Projects page error:', error)
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader>
-            <CardTitle className="text-destructive">Error</CardTitle>
+            <CardTitle className="text-destructive">Error Loading Projects</CardTitle>
             <CardDescription>
-              Failed to load projects. Please try again.
+              {error.message || 'Failed to load projects. Please try again.'}
             </CardDescription>
           </CardHeader>
+          <CardContent>
+            <div className="space-y-2 text-sm text-muted-foreground">
+              <p>User ID: {user?.id}</p>
+              <p>Error details: {JSON.stringify(error)}</p>
+            </div>
+          </CardContent>
         </Card>
         <MobileBottomNav />
       </div>
@@ -103,6 +142,8 @@ export default function Projects() {
     })
   }
 
+  console.log('Rendering projects page with projects:', projects?.length || 0)
+
   return (
     <div className="min-h-screen bg-background p-4 pb-20">
       <div className="max-w-4xl mx-auto">
@@ -119,15 +160,28 @@ export default function Projects() {
           <p className="text-muted-foreground">
             Manage and track your construction projects
           </p>
+          <div className="mt-2 text-sm text-muted-foreground">
+            <p>Logged in as: {user?.email}</p>
+            <p>User ID: {user?.id}</p>
+            <p>Projects found: {projects?.length || 0}</p>
+          </div>
         </div>
 
         {projects?.length === 0 ? (
           <Card className="text-center py-12">
             <CardContent>
               <Briefcase className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold mb-2">No projects yet</h3>
-              <p className="text-muted-foreground">
-                Contact your project manager to get assigned to projects.
+              <h3 className="text-lg font-semibold mb-2">No projects available</h3>
+              <p className="text-muted-foreground mb-4">
+                You don't have access to any projects yet. This could be because:
+              </p>
+              <ul className="text-sm text-muted-foreground text-left max-w-md mx-auto space-y-1">
+                <li>• You haven't been assigned to any projects</li>
+                <li>• Your account permissions need to be updated</li>
+                <li>• There might be a database connectivity issue</li>
+              </ul>
+              <p className="text-sm text-muted-foreground mt-4">
+                Contact your project manager if you believe this is incorrect.
               </p>
             </CardContent>
           </Card>
