@@ -82,20 +82,32 @@ export default function Login() {
       
       <Card className="w-full max-w-md relative z-10 shadow-xl border-2 border-construction-yellow/20">
         <CardHeader className="text-center pb-2">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="flex items-center justify-center w-12 h-12 bg-construction-yellow rounded-xl">
-              <HardHat className="w-6 h-6 text-construction-yellow-foreground" />
-            </div>
-            <div className="flex items-center justify-center w-12 h-12 bg-construction-orange rounded-xl">
-              <Wrench className="w-6 h-6 text-construction-orange-foreground" />
+          <div className="flex items-center justify-center mb-6">
+            <div className="bg-emerald-500 px-8 py-6 rounded-lg flex items-center gap-4">
+              {/* NextGen Home Logo */}
+              <div className="w-12 h-12 relative">
+                <svg viewBox="0 0 48 48" className="w-full h-full">
+                  <path
+                    d="M24 4L40 16v24H32V24H16v16H8V16L24 4z"
+                    fill="white"
+                    stroke="white"
+                    strokeWidth="2"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M16 20l8-8 8 8v12H16V20z"
+                    fill="rgb(34, 197, 94)"
+                    stroke="white"
+                    strokeWidth="1.5"
+                  />
+                </svg>
+              </div>
+              <div className="text-white">
+                <div className="text-xl font-bold tracking-wider">NEXTGEN</div>
+                <div className="text-xl font-bold tracking-wider">HOME</div>
+              </div>
             </div>
           </div>
-          <CardTitle className="text-2xl xs:text-3xl font-bold text-construction-gray-900">
-            BuildingBuddy
-          </CardTitle>
-          <CardDescription className="text-base xs:text-lg text-construction-gray-600">
-            Worker Portal
-          </CardDescription>
         </CardHeader>
         <CardContent className="pt-2">
           <form onSubmit={handleSubmit} className="space-y-6">
