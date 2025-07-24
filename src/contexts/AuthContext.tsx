@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
 import { User, Session, AuthError } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
+import { authRateLimiter } from '@/lib/security'
 
 interface AuthContextType {
   user: User | null
@@ -38,6 +39,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const signIn = async (email: string, password: string) => {
+    // Rate limiting check
+    const clientKey = `auth_${email}`
+    if (!authRateLimiter.isAllowed(clientKey)) {
+      const remainingTime = Math.ceil(authRateLimiter.getRemainingTime(clientKey) / 1000 / 60)
+      return { 
+        error: { 
+          message: `Too many login attempts. Please try again in ${remainingTime} minutes.`
+        } as AuthError 
+      }
+    }
+
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,

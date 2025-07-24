@@ -10,6 +10,7 @@ import { User, Mail, Calendar, Building, Edit, Save, X } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useToast } from '@/hooks/use-toast'
+import { profileValidationSchema, sanitizeText } from '@/lib/security'
 
 export default function Profile() {
   const { user, signOut } = useAuth()
@@ -42,6 +43,22 @@ export default function Profile() {
 
   const handleSaveProfile = async () => {
     if (!user) return
+
+    // Validate and sanitize input
+    const validation = profileValidationSchema.safeParse({
+      full_name: fullName.trim()
+    })
+
+    if (!validation.success) {
+      toast({
+        title: "Validation Error",
+        description: validation.error.errors[0]?.message || "Invalid name",
+        variant: "destructive",
+      })
+      return
+    }
+
+    const sanitizedName = sanitizeText(validation.data.full_name)
     
     setIsLoading(true)
     try {
@@ -49,11 +66,12 @@ export default function Profile() {
         .from('profiles')
         .upsert({
           id: user.id,
-          full_name: fullName
+          full_name: sanitizedName
         })
       
       if (error) throw error
       
+      setFullName(sanitizedName)
       setIsEditing(false)
       toast({
         title: 'Profile updated',

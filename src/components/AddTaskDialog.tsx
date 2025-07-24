@@ -11,6 +11,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
 import { Plus } from 'lucide-react'
+import { taskValidationSchema, sanitizeText } from '@/lib/security'
 
 interface AddTaskDialogProps {
   trigger?: React.ReactNode
@@ -94,15 +95,6 @@ export function AddTaskDialog({ trigger }: AddTaskDialogProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    if (!title.trim()) {
-      toast({
-        title: 'Error',
-        description: 'Task title is required',
-        variant: 'destructive',
-      })
-      return
-    }
-
     if (!user) {
       toast({
         title: 'Error',
@@ -112,11 +104,29 @@ export function AddTaskDialog({ trigger }: AddTaskDialogProps) {
       return
     }
 
-    createTaskMutation.mutate({
+    // Validate and sanitize input
+    const validation = taskValidationSchema.safeParse({
       title: title.trim(),
-      description: description.trim() || undefined,
-      priority
+      description: description.trim(),
+      priority: priority as 'low' | 'medium' | 'high'
     })
+
+    if (!validation.success) {
+      toast({
+        title: "Validation Error",
+        description: validation.error.errors[0]?.message || "Invalid input",
+        variant: "destructive",
+      })
+      return
+    }
+
+    const sanitizedData = {
+      title: sanitizeText(validation.data.title),
+      description: validation.data.description ? sanitizeText(validation.data.description) : undefined,
+      priority: validation.data.priority
+    }
+
+    createTaskMutation.mutate(sanitizedData)
   }
 
   const defaultTrigger = (

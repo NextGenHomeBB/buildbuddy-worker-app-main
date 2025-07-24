@@ -149,7 +149,6 @@ export type Database = {
           created_at: string | null
           full_name: string | null
           id: string
-          role: string | null
         }
         Insert: {
           avatar_url?: string | null
@@ -157,7 +156,6 @@ export type Database = {
           created_at?: string | null
           full_name?: string | null
           id: string
-          role?: string | null
         }
         Update: {
           avatar_url?: string | null
@@ -165,7 +163,6 @@ export type Database = {
           created_at?: string | null
           full_name?: string | null
           id?: string
-          role?: string | null
         }
         Relationships: [
           {
@@ -205,13 +202,6 @@ export type Database = {
             columns: ["material_id"]
             isOneToOne: false
             referencedRelation: "materials"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "project_materials_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "project_summary_view"
             referencedColumns: ["id"]
           },
           {
@@ -258,13 +248,6 @@ export type Database = {
           status?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "project_phases_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "project_summary_view"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "project_phases_project_id_fkey"
             columns: ["project_id"]
@@ -334,6 +317,42 @@ export type Database = {
           },
         ]
       }
+      security_audit_log: {
+        Row: {
+          action: string
+          id: string
+          ip_address: string | null
+          new_values: Json | null
+          old_values: Json | null
+          record_id: string | null
+          table_name: string
+          timestamp: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          id?: string
+          ip_address?: string | null
+          new_values?: Json | null
+          old_values?: Json | null
+          record_id?: string | null
+          table_name: string
+          timestamp?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          id?: string
+          ip_address?: string | null
+          new_values?: Json | null
+          old_values?: Json | null
+          record_id?: string | null
+          table_name?: string
+          timestamp?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       tasks: {
         Row: {
           assignee: string | null
@@ -390,20 +409,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "tasks_phase_id_fkey"
-            columns: ["phase_id"]
-            isOneToOne: false
-            referencedRelation: "project_phases_v"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "tasks_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "project_summary_view"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "tasks_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
@@ -441,13 +446,6 @@ export type Database = {
           work_date?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "time_sheets_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "project_summary_view"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "time_sheets_project_id_fkey"
             columns: ["project_id"]
@@ -494,13 +492,6 @@ export type Database = {
             foreignKeyName: "user_project_role_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
-            referencedRelation: "project_summary_view"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_project_role_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
           },
@@ -513,53 +504,32 @@ export type Database = {
           },
         ]
       }
-    }
-    Views: {
-      project_phases_v: {
+      user_roles: {
         Row: {
-          completed_tasks: number | null
-          created_at: string | null
-          description: string | null
-          end_date: string | null
-          id: string | null
-          name: string | null
-          progress: number | null
-          project_budget: number | null
-          project_id: string | null
-          project_name: string | null
-          start_date: string | null
-          status: string | null
-          total_tasks: number | null
+          assigned_at: string | null
+          assigned_by: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "project_phases_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "project_summary_view"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "project_phases_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "projects"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      project_summary_view: {
-        Row: {
-          budget: number | null
-          company_name: string | null
-          id: string | null
-          name: string | null
-          progress: number | null
-          start_date: string | null
-          status: string | null
+        Insert: {
+          assigned_at?: string | null
+          assigned_by?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          assigned_at?: string | null
+          assigned_by?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
         }
         Relationships: []
       }
+    }
+    Views: {
       "worker.my_tasks_view": {
         Row: {
           assigned_worker_id: string | null
@@ -626,9 +596,16 @@ export type Database = {
         Args: { proj: string }
         Returns: undefined
       }
+      user_has_role: {
+        Args: {
+          _user_id: string
+          _role: Database["public"]["Enums"]["app_role"]
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "manager" | "worker"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -755,6 +732,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "manager", "worker"],
+    },
   },
 } as const
