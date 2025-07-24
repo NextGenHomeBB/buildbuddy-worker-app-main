@@ -74,7 +74,7 @@ export default function Today() {
           )
         `)
         .eq('assignee', user.id)
-        .eq('status', 'completed')
+        .eq('status', 'done')
         .not('completed_at', 'is', null)
         .order('completed_at', { ascending: false })
         .limit(20)

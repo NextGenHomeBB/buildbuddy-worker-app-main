@@ -26,7 +26,11 @@ export function useMyTasks() {
 
   const updateTaskStatus = useMutation({
     mutationFn: async ({ taskId, status }: { taskId: string; status: WorkerTask['status'] }) => {
-      const patch = { status: status === 'completed' ? 'done' : 'todo', updated_at: new Date().toISOString() }
+      const patch = { 
+        status: status === 'completed' ? 'done' : 'todo', 
+        updated_at: new Date().toISOString(),
+        completed_at: status === 'completed' ? new Date().toISOString() : null
+      }
       
       if (!navigator.onLine) {
         // Queue the mutation for when we come back online
