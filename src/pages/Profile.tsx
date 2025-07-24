@@ -153,9 +153,24 @@ export default function Profile() {
   };
   const handleCancelEdit = () => {
     setIsEditing(false);
-    // Reset to original value
+    // Reset to original values from database
     const originalName = user?.user_metadata?.full_name || '';
     setFullName(originalName);
+    // Reset roles to their loaded values - we need to refetch from database
+    if (user) {
+      const fetchProfile = async () => {
+        const { data: profile } = await supabase.from('profiles').select('work_role').eq('id', user.id).single();
+        if (profile?.work_role) {
+          const roles = Array.isArray(profile.work_role) ? profile.work_role : [profile.work_role];
+          const predefined = roles.filter(role => predefinedRoles.includes(role));
+          const custom = roles.filter(role => !predefinedRoles.includes(role));
+          setSelectedRoles(predefined.length > 0 ? predefined : ['Construction Worker']);
+          setCustomRoles(custom);
+        }
+      };
+      fetchProfile();
+    }
+    setNewCustomRole('');
   };
   const uploadAvatar = async (file: File) => {
     if (!user) return;
