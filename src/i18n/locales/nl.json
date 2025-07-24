@@ -55,7 +55,8 @@
     "selectAtLeastOneRole": "Selecteer ten minste één werkrol",
     "error": "Fout",
     "failedToUpdate": "Bijwerken van profiel mislukt. Probeer het opnieuw.",
-    "failedToUploadAvatar": "Uploaden van avatar mislukt. Probeer het opnieuw."
+    "failedToUploadAvatar": "Uploaden van avatar mislukt. Probeer het opnieuw.",
+    "cropImage": "Afbeelding bijsnijden"
   },
   "navigation": {
     "today": "Vandaag",

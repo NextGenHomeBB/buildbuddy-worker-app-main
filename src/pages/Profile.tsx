@@ -8,6 +8,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Label } from '@/components/ui/label';
 import { MobileBottomNav } from '@/components/MobileBottomNav';
+import { ImageCropper } from '@/components/ImageCropper';
 import { User, Mail, Calendar, Building, Edit, Save, X, Camera, Upload, Briefcase } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
@@ -31,6 +32,8 @@ export default function Profile() {
   const [isLoading, setIsLoading] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState('');
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [cropperOpen, setCropperOpen] = useState(false);
+  const [imageToCrop, setImageToCrop] = useState('');
 
   const predefinedRoles = [
     t('roles.constructionWorker'),
@@ -198,23 +201,38 @@ export default function Profile() {
       if (updateError) throw updateError;
       setAvatarUrl(data.publicUrl);
       toast({
-        title: 'Avatar updated',
-        description: 'Your profile picture has been updated successfully.'
+        title: t('profile.avatarUpdated'),
+        description: t('profile.avatarUpdateSuccess')
       });
     } catch (error) {
       toast({
-        title: 'Error',
-        description: 'Failed to upload avatar. Please try again.',
+        title: t('profile.error'),
+        description: t('profile.failedToUploadAvatar'),
         variant: 'destructive'
       });
     } finally {
       setIsUploadingAvatar(false);
     }
   };
+
+  const handleCroppedImage = async (croppedImageBlob: Blob) => {
+    // Convert blob to file for upload
+    const file = new File([croppedImageBlob], 'avatar.jpg', { type: 'image/jpeg' });
+    await uploadAvatar(file);
+  };
+
+  const openImageCropper = (file: File) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      setImageToCrop(reader.result as string);
+      setCropperOpen(true);
+    };
+    reader.readAsDataURL(file);
+  };
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      uploadAvatar(file);
+      openImageCropper(file);
     }
   };
   const handleCameraCapture = () => {
@@ -225,7 +243,7 @@ export default function Profile() {
     input.onchange = e => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (file) {
-        uploadAvatar(file);
+        openImageCropper(file);
       }
     };
     input.click();
@@ -237,7 +255,7 @@ export default function Profile() {
     input.onchange = e => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (file) {
-        uploadAvatar(file);
+        openImageCropper(file);
       }
     };
     input.click();
@@ -442,5 +460,12 @@ export default function Profile() {
       </div>
 
       <MobileBottomNav />
+      
+      <ImageCropper
+        open={cropperOpen}
+        onClose={() => setCropperOpen(false)}
+        imageSrc={imageToCrop}
+        onCropComplete={handleCroppedImage}
+      />
     </div>;
 }

@@ -55,7 +55,8 @@
     "selectAtLeastOneRole": "Please select at least one work role",
     "error": "Error",
     "failedToUpdate": "Failed to update profile. Please try again.",
-    "failedToUploadAvatar": "Failed to upload avatar. Please try again."
+    "failedToUploadAvatar": "Failed to upload avatar. Please try again.",
+    "cropImage": "Crop Image"
   },
   "navigation": {
     "today": "Today",
