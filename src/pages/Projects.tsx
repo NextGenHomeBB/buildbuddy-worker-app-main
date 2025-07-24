@@ -156,7 +156,15 @@ export default function Projects() {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back
           </Button>
-          <h1 className="text-3xl font-bold text-foreground mb-2">Projects</h1>
+          <div className="flex items-center justify-center mb-4">
+            <img 
+              src="/lovable-uploads/f8eff9bf-a328-4c88-bf0b-a0a5a85c77ec.png" 
+              alt="NextGen Home" 
+              className="h-8 w-auto cursor-pointer hover:opacity-80 transition-opacity"
+              onClick={() => navigate('/today')}
+            />
+          </div>
+          <h1 className="text-3xl font-bold text-foreground mb-2 text-center">Projects</h1>
           <p className="text-muted-foreground">
             Manage and track your construction projects
           </p>

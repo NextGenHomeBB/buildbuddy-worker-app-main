@@ -167,7 +167,12 @@ export default function Today() {
               </DropdownMenuContent>
             </DropdownMenu>
             
-            <h1 className="text-lg font-semibold text-gray-900">Today</h1>
+            <img 
+              src="/lovable-uploads/f8eff9bf-a328-4c88-bf0b-a0a5a85c77ec.png" 
+              alt="NextGen Home" 
+              className="h-8 w-auto cursor-pointer hover:opacity-80 transition-opacity"
+              onClick={() => navigate('/today')}
+            />
             
             <div className="w-9" /> {/* Spacer for center alignment */}
           </div>

@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -17,6 +18,7 @@ import { profileValidationSchema, sanitizeText } from '@/lib/security';
 import { useAuth } from '@/contexts/AuthContext';
 export default function Profile() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const {
     user,
     signOut
@@ -263,8 +265,13 @@ export default function Profile() {
   return <div className="min-h-screen bg-background pb-20 lg:pb-0">
       {/* Header */}
       <div className="bg-card border-b border-border p-4">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-2xl font-bold text-foreground">{t('profile.title')}</h1>
+        <div className="max-w-4xl mx-auto flex items-center justify-center">
+          <img 
+            src="/lovable-uploads/f8eff9bf-a328-4c88-bf0b-a0a5a85c77ec.png" 
+            alt="NextGen Home" 
+            className="h-8 w-auto cursor-pointer hover:opacity-80 transition-opacity"
+            onClick={() => navigate('/today')}
+          />
         </div>
       </div>
 

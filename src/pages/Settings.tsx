@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useLanguage } from '@/hooks/useLanguage'
 import { useAuth } from '@/contexts/AuthContext'
@@ -12,6 +13,7 @@ import { useToast } from '@/hooks/use-toast'
 import { Bell, Moon, Globe, Shield, HelpCircle, Download, Clock } from 'lucide-react'
 
 export default function Settings() {
+  const navigate = useNavigate()
   const { user } = useAuth()
   const { toast } = useToast()
   const { t } = useTranslation()
@@ -94,8 +96,13 @@ export default function Settings() {
     <div className="min-h-screen bg-background pb-20 lg:pb-0">
       {/* Header */}
       <div className="bg-card border-b border-border p-4">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-2xl font-bold text-foreground">{t('settings.title')}</h1>
+        <div className="max-w-4xl mx-auto flex items-center justify-center">
+          <img 
+            src="/lovable-uploads/f8eff9bf-a328-4c88-bf0b-a0a5a85c77ec.png" 
+            alt="NextGen Home" 
+            className="h-8 w-auto cursor-pointer hover:opacity-80 transition-opacity"
+            onClick={() => navigate('/today')}
+          />
         </div>
       </div>
 
