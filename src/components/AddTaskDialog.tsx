@@ -16,14 +16,17 @@ import { taskValidationSchema, sanitizeText } from '@/lib/security'
 
 interface AddTaskDialogProps {
   trigger?: React.ReactNode
+  onClose?: () => void
+  defaultListId?: string
 }
 
-export function AddTaskDialog({ trigger }: AddTaskDialogProps) {
+export function AddTaskDialog({ trigger, onClose, defaultListId }: AddTaskDialogProps) {
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [priority, setPriority] = useState<'low' | 'medium' | 'high'>('medium')
+  const [listId, setListId] = useState(defaultListId || '')
   const { toast } = useToast()
   const { user } = useAuth()
   const queryClient = useQueryClient()
@@ -54,6 +57,7 @@ export function AddTaskDialog({ trigger }: AddTaskDialogProps) {
         status: 'todo',
         project_id: userProjectRole?.project_id || null,
         phase_id: null, // We can add phase selection later
+        list_id: listId || null,
       }
 
       console.log('Inserting task:', taskToInsert)
@@ -82,7 +86,9 @@ export function AddTaskDialog({ trigger }: AddTaskDialogProps) {
       setTitle('')
       setDescription('')
       setPriority('medium')
+      setListId(defaultListId || '')
       setOpen(false)
+      onClose?.()
     },
     onError: (error) => {
       console.error('Task creation error:', error)

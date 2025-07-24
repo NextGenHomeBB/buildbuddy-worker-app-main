@@ -356,6 +356,33 @@ export type Database = {
         }
         Relationships: []
       }
+      task_lists: {
+        Row: {
+          color_hex: string | null
+          created_at: string
+          id: string
+          name: string
+          owner_id: string
+          updated_at: string
+        }
+        Insert: {
+          color_hex?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          owner_id: string
+          updated_at?: string
+        }
+        Update: {
+          color_hex?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          owner_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       task_relations: {
         Row: {
           created_at: string | null
@@ -416,7 +443,9 @@ export type Database = {
           created_at: string | null
           description: string | null
           id: string
+          list_id: string | null
           phase_id: string | null
+          position: number | null
           priority: string | null
           project_id: string | null
           status: string | null
@@ -429,7 +458,9 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           id?: string
+          list_id?: string | null
           phase_id?: string | null
+          position?: number | null
           priority?: string | null
           project_id?: string | null
           status?: string | null
@@ -442,7 +473,9 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           id?: string
+          list_id?: string | null
           phase_id?: string | null
+          position?: number | null
           priority?: string | null
           project_id?: string | null
           status?: string | null
@@ -455,6 +488,13 @@ export type Database = {
             columns: ["assignee"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_list_id_fkey"
+            columns: ["list_id"]
+            isOneToOne: false
+            referencedRelation: "task_lists"
             referencedColumns: ["id"]
           },
           {

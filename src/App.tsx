@@ -20,6 +20,8 @@ import ProjectDetails from "./pages/ProjectDetails";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import TaskMap from "./pages/TaskMap";
+import ListsHomeScreen from "./pages/ListsHomeScreen";
+import TaskListScreen from "./pages/TaskListScreen";
 import NotFound from "./pages/NotFound";
 import { registerOnlineListener } from "@/lib/offlineQueue";
 
@@ -98,6 +100,8 @@ const App = () => {
                       <TaskMap />
                     </RequireAuth>
                   } />
+                  <Route path="/lists" element={<RequireAuth><ListsHomeScreen /></RequireAuth>} />
+                  <Route path="/lists/:id" element={<RequireAuth><TaskListScreen /></RequireAuth>} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>

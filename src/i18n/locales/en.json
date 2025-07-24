@@ -61,6 +61,7 @@
   "navigation": {
     "today": "Today",
     "calendar": "Calendar",
+    "lists": "Lists",
     "projects": "Projects",
     "profile": "Profile",
     "settings": "Settings"
