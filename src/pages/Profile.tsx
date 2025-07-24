@@ -4,9 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { MobileBottomNav } from '@/components/MobileBottomNav';
 import { User, Mail, Calendar, Building, Edit, Save, X, Camera, Upload, Briefcase } from 'lucide-react';
 import { useState, useEffect } from 'react';
@@ -23,9 +23,9 @@ export default function Profile() {
   } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [fullName, setFullName] = useState('');
-  const [workRole, setWorkRole] = useState('');
-  const [customRole, setCustomRole] = useState('');
-  const [showCustomRoleInput, setShowCustomRoleInput] = useState(false);
+  const [selectedRoles, setSelectedRoles] = useState<string[]>(['Construction Worker']);
+  const [customRoles, setCustomRoles] = useState<string[]>([]);
+  const [newCustomRole, setNewCustomRole] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState('');
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
@@ -41,8 +41,7 @@ export default function Profile() {
     'HVAC Technician',
     'Heavy Equipment Operator',
     'Site Supervisor',
-    'Project Manager',
-    'Other'
+    'Project Manager'
   ];
   useEffect(() => {
     const fetchProfile = async () => {
@@ -53,38 +52,53 @@ export default function Profile() {
       if (profile) {
         setFullName(profile.full_name || '');
         setAvatarUrl(profile.avatar_url || '');
-        const roleValue = profile.work_role || 'Construction Worker';
-        setWorkRole(roleValue);
         
-        // Check if it's a predefined role or custom
-        if (!predefinedRoles.includes(roleValue) && roleValue !== 'Other') {
-          setShowCustomRoleInput(true);
-          setCustomRole(roleValue);
-          setWorkRole('Other');
+        // Handle JSONB array format from database
+        const roles = profile.work_role;
+        if (Array.isArray(roles)) {
+          const predefined = roles.filter(role => predefinedRoles.includes(role));
+          const custom = roles.filter(role => !predefinedRoles.includes(role));
+          setSelectedRoles(predefined.length > 0 ? predefined : ['Construction Worker']);
+          setCustomRoles(custom);
+        } else {
+          // Fallback for legacy single role format
+          setSelectedRoles([roles || 'Construction Worker']);
+          setCustomRoles([]);
         }
       }
     };
     fetchProfile();
   }, [user]);
+
   const handleSignOut = async () => {
     await signOut();
   };
 
-  const handleRoleChange = (value: string) => {
-    setWorkRole(value);
-    if (value === 'Other') {
-      setShowCustomRoleInput(true);
-    } else {
-      setShowCustomRoleInput(false);
-      setCustomRole('');
+  const handleRoleToggle = (role: string) => {
+    setSelectedRoles(prev => 
+      prev.includes(role) 
+        ? prev.filter(r => r !== role)
+        : [...prev, role]
+    );
+  };
+
+  const handleAddCustomRole = () => {
+    const trimmedRole = newCustomRole.trim();
+    if (trimmedRole && !customRoles.includes(trimmedRole) && !predefinedRoles.includes(trimmedRole)) {
+      setCustomRoles(prev => [...prev, trimmedRole]);
+      setNewCustomRole('');
     }
+  };
+
+  const handleRemoveCustomRole = (role: string) => {
+    setCustomRoles(prev => prev.filter(r => r !== role));
   };
 
   const handleSaveProfile = async () => {
     if (!user) return;
 
-    // Determine the final role value
-    const finalRole = workRole === 'Other' ? customRole.trim() : workRole;
+    // Combine all selected roles
+    const allRoles = [...selectedRoles, ...customRoles];
     
     // Validate and sanitize input
     const validation = profileValidationSchema.safeParse({
@@ -99,17 +113,17 @@ export default function Profile() {
       return;
     }
 
-    if (!finalRole) {
+    if (allRoles.length === 0) {
       toast({
         title: "Validation Error", 
-        description: "Please select or enter a work role",
+        description: "Please select at least one work role",
         variant: "destructive"
       });
       return;
     }
 
     const sanitizedName = sanitizeText(validation.data.full_name);
-    const sanitizedRole = sanitizeText(finalRole);
+    const sanitizedRoles = allRoles.map(role => sanitizeText(role));
     
     setIsLoading(true);
     try {
@@ -118,7 +132,7 @@ export default function Profile() {
       } = await supabase.from('profiles').upsert({
         id: user.id,
         full_name: sanitizedName,
-        work_role: sanitizedRole
+        work_role: sanitizedRoles
       });
       if (error) throw error;
       setFullName(sanitizedName);
@@ -266,9 +280,13 @@ export default function Profile() {
             <CardTitle className="text-xl">
               {user?.user_metadata?.full_name || 'Worker'}
             </CardTitle>
-            <Badge variant="secondary" className="mx-auto">
-              {workRole === 'Other' ? customRole : workRole || 'Construction Worker'}
-            </Badge>
+            <div className="flex flex-wrap gap-1 justify-center">
+              {[...selectedRoles, ...customRoles].map((role, index) => (
+                <Badge key={index} variant="secondary">
+                  {role}
+                </Badge>
+              ))}
+            </div>
           </CardHeader>
           <CardContent className="space-y-4">
             {/* Editable Name Field */}
@@ -290,41 +308,82 @@ export default function Profile() {
                 </div>}
             </div>
             
-            {/* Work Role Field */}
+            {/* Work Roles Field */}
             <div className="space-y-2">
-              <Label htmlFor="workRole" className="text-sm font-medium">Work Role</Label>
+              <Label className="text-sm font-medium">Work Roles</Label>
               {isEditing ? (
-                <div className="space-y-3">
-                  <Select value={workRole} onValueChange={handleRoleChange}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select your work role" />
-                    </SelectTrigger>
-                    <SelectContent className="z-50 bg-popover">
-                      {predefinedRoles.map((role) => (
-                        <SelectItem key={role} value={role}>
+                <div className="space-y-4">
+                  {/* Predefined Roles Checkboxes */}
+                  <div className="grid grid-cols-2 gap-2">
+                    {predefinedRoles.map((role) => (
+                      <div key={role} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={role}
+                          checked={selectedRoles.includes(role)}
+                          onCheckedChange={() => handleRoleToggle(role)}
+                        />
+                        <Label htmlFor={role} className="text-sm font-normal cursor-pointer">
                           {role}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  
-                  {showCustomRoleInput && (
-                    <Input
-                      id="customRole"
-                      value={customRole}
-                      onChange={(e) => setCustomRole(e.target.value)}
-                      placeholder="Enter your custom work role"
-                      className="mt-2"
-                    />
-                  )}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Custom Roles Section */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Custom Roles</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        value={newCustomRole}
+                        onChange={(e) => setNewCustomRole(e.target.value)}
+                        placeholder="Add a custom role"
+                        onKeyPress={(e) => e.key === 'Enter' && handleAddCustomRole()}
+                      />
+                      <Button 
+                        type="button" 
+                        size="sm" 
+                        onClick={handleAddCustomRole}
+                        disabled={!newCustomRole.trim()}
+                      >
+                        Add
+                      </Button>
+                    </div>
+
+                    {/* Display Custom Roles */}
+                    {customRoles.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {customRoles.map((role, index) => (
+                          <Badge 
+                            key={index} 
+                            variant="outline" 
+                            className="flex items-center gap-1"
+                          >
+                            {role}
+                            <X 
+                              className="w-3 h-3 cursor-pointer hover:text-destructive" 
+                              onClick={() => handleRemoveCustomRole(role)}
+                            />
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               ) : (
                 <div className="flex items-center justify-between p-2 border rounded-md">
                   <div className="flex items-center gap-2">
                     <Briefcase className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-foreground">
-                      {workRole === 'Other' ? customRole : workRole || 'Construction Worker'}
-                    </span>
+                    <div className="flex flex-wrap gap-1">
+                      {[...selectedRoles, ...customRoles].length > 0 ? (
+                        [...selectedRoles, ...customRoles].map((role, index) => (
+                          <span key={index} className="text-foreground">
+                            {role}{index < [...selectedRoles, ...customRoles].length - 1 ? ', ' : ''}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="text-foreground">No roles selected</span>
+                      )}
+                    </div>
                   </div>
                   <Button size="sm" variant="ghost" onClick={() => setIsEditing(true)}>
                     <Edit className="w-4 h-4" />
