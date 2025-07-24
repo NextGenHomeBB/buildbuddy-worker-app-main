@@ -6,8 +6,9 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { MobileBottomNav } from '@/components/MobileBottomNav';
-import { User, Mail, Calendar, Building, Edit, Save, X, Camera, Upload } from 'lucide-react';
+import { User, Mail, Calendar, Building, Edit, Save, X, Camera, Upload, Briefcase } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
@@ -22,18 +23,45 @@ export default function Profile() {
   } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [fullName, setFullName] = useState('');
+  const [workRole, setWorkRole] = useState('');
+  const [customRole, setCustomRole] = useState('');
+  const [showCustomRoleInput, setShowCustomRoleInput] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState('');
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+
+  const predefinedRoles = [
+    'Construction Worker',
+    'Electrician', 
+    'Plumber',
+    'Carpenter',
+    'Mason',
+    'Roofer',
+    'Painter',
+    'HVAC Technician',
+    'Heavy Equipment Operator',
+    'Site Supervisor',
+    'Project Manager',
+    'Other'
+  ];
   useEffect(() => {
     const fetchProfile = async () => {
       if (!user) return;
       const {
         data: profile
-      } = await supabase.from('profiles').select('full_name, avatar_url').eq('id', user.id).single();
+      } = await supabase.from('profiles').select('full_name, avatar_url, work_role').eq('id', user.id).single();
       if (profile) {
         setFullName(profile.full_name || '');
         setAvatarUrl(profile.avatar_url || '');
+        const roleValue = profile.work_role || 'Construction Worker';
+        setWorkRole(roleValue);
+        
+        // Check if it's a predefined role or custom
+        if (!predefinedRoles.includes(roleValue) && roleValue !== 'Other') {
+          setShowCustomRoleInput(true);
+          setCustomRole(roleValue);
+          setWorkRole('Other');
+        }
       }
     };
     fetchProfile();
@@ -41,9 +69,23 @@ export default function Profile() {
   const handleSignOut = async () => {
     await signOut();
   };
+
+  const handleRoleChange = (value: string) => {
+    setWorkRole(value);
+    if (value === 'Other') {
+      setShowCustomRoleInput(true);
+    } else {
+      setShowCustomRoleInput(false);
+      setCustomRole('');
+    }
+  };
+
   const handleSaveProfile = async () => {
     if (!user) return;
 
+    // Determine the final role value
+    const finalRole = workRole === 'Other' ? customRole.trim() : workRole;
+    
     // Validate and sanitize input
     const validation = profileValidationSchema.safeParse({
       full_name: fullName.trim()
@@ -56,21 +98,34 @@ export default function Profile() {
       });
       return;
     }
+
+    if (!finalRole) {
+      toast({
+        title: "Validation Error", 
+        description: "Please select or enter a work role",
+        variant: "destructive"
+      });
+      return;
+    }
+
     const sanitizedName = sanitizeText(validation.data.full_name);
+    const sanitizedRole = sanitizeText(finalRole);
+    
     setIsLoading(true);
     try {
       const {
         error
       } = await supabase.from('profiles').upsert({
         id: user.id,
-        full_name: sanitizedName
+        full_name: sanitizedName,
+        work_role: sanitizedRole
       });
       if (error) throw error;
       setFullName(sanitizedName);
       setIsEditing(false);
       toast({
         title: 'Profile updated',
-        description: 'Your name has been updated successfully.'
+        description: 'Your profile has been updated successfully.'
       });
     } catch (error) {
       toast({
@@ -212,7 +267,7 @@ export default function Profile() {
               {user?.user_metadata?.full_name || 'Worker'}
             </CardTitle>
             <Badge variant="secondary" className="mx-auto">
-              Construction Worker
+              {workRole === 'Other' ? customRole : workRole || 'Construction Worker'}
             </Badge>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -233,6 +288,49 @@ export default function Profile() {
                     <Edit className="w-4 h-4" />
                   </Button>
                 </div>}
+            </div>
+            
+            {/* Work Role Field */}
+            <div className="space-y-2">
+              <Label htmlFor="workRole" className="text-sm font-medium">Work Role</Label>
+              {isEditing ? (
+                <div className="space-y-3">
+                  <Select value={workRole} onValueChange={handleRoleChange}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select your work role" />
+                    </SelectTrigger>
+                    <SelectContent className="z-50 bg-popover">
+                      {predefinedRoles.map((role) => (
+                        <SelectItem key={role} value={role}>
+                          {role}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  
+                  {showCustomRoleInput && (
+                    <Input
+                      id="customRole"
+                      value={customRole}
+                      onChange={(e) => setCustomRole(e.target.value)}
+                      placeholder="Enter your custom work role"
+                      className="mt-2"
+                    />
+                  )}
+                </div>
+              ) : (
+                <div className="flex items-center justify-between p-2 border rounded-md">
+                  <div className="flex items-center gap-2">
+                    <Briefcase className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-foreground">
+                      {workRole === 'Other' ? customRole : workRole || 'Construction Worker'}
+                    </span>
+                  </div>
+                  <Button size="sm" variant="ghost" onClick={() => setIsEditing(true)}>
+                    <Edit className="w-4 h-4" />
+                  </Button>
+                </div>
+              )}
             </div>
             
             <div className="flex items-center gap-3 text-muted-foreground">
