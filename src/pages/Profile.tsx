@@ -187,7 +187,11 @@ export default function Profile() {
             <CardTitle>Account Settings</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Button variant="outline" className="w-full justify-start">
+            <Button 
+              variant="outline" 
+              className="w-full justify-start"
+              onClick={() => setIsEditing(true)}
+            >
               <User className="w-4 h-4 mr-2" />
               Edit Profile
             </Button>
