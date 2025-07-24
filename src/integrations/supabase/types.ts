@@ -320,6 +320,33 @@ export type Database = {
           },
         ]
       }
+      rate_limits: {
+        Row: {
+          attempt_count: number | null
+          created_at: string | null
+          id: string
+          operation: string
+          user_id: string
+          window_start: string | null
+        }
+        Insert: {
+          attempt_count?: number | null
+          created_at?: string | null
+          id?: string
+          operation: string
+          user_id: string
+          window_start?: string | null
+        }
+        Update: {
+          attempt_count?: number | null
+          created_at?: string | null
+          id?: string
+          operation?: string
+          user_id?: string
+          window_start?: string | null
+        }
+        Relationships: []
+      }
       security_audit_log: {
         Row: {
           action: string
@@ -672,6 +699,14 @@ export type Database = {
       }
     }
     Functions: {
+      check_rate_limit: {
+        Args: {
+          operation_name: string
+          max_attempts?: number
+          window_minutes?: number
+        }
+        Returns: boolean
+      }
       create_user_profile: {
         Args: { user_id: string; user_email?: string }
         Returns: Json
@@ -679,6 +714,20 @@ export type Database = {
       get_current_user_role: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      get_my_tasks: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: string
+          title: string
+          description: string
+          status: string
+          priority: string
+          assigned_worker_id: string
+          due_date: string
+          created_at: string
+          updated_at: string
+        }[]
       }
       setup_demo_data: {
         Args: { manager_id: string; worker_id: string }
