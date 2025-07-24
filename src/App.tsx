@@ -1,5 +1,6 @@
 
 import { useEffect } from "react";
+import { I18nextProvider } from 'react-i18next';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -8,6 +9,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { RequireAuth } from "@/components/RequireAuth";
 import { UserSetupProvider } from "@/components/UserSetupProvider";
+import i18n from './i18n';
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
@@ -43,60 +45,62 @@ const App = () => {
   }, [])
 
   return (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <UserSetupProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<SignUp />} />
-              <Route path="/today" element={
-                <RequireAuth>
-                  <Today />
-                </RequireAuth>
-              } />
-              <Route path="/tasks" element={
-                <RequireAuth>
-                  <Today />
-                </RequireAuth>
-              } />
-              <Route path="/calendar" element={
-                <RequireAuth>
-                  <Calendar />
-                </RequireAuth>
-              } />
-              <Route path="/projects" element={
-                <RequireAuth>
-                  <Projects />
-                </RequireAuth>
-              } />
-              <Route path="/projects/:id" element={
-                <RequireAuth>
-                  <ProjectDetails />
-                </RequireAuth>
-              } />
-              <Route path="/profile" element={
-                <RequireAuth>
-                  <Profile />
-                </RequireAuth>
-              } />
-              <Route path="/settings" element={
-                <RequireAuth>
-                  <Settings />
-                </RequireAuth>
-              } />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
-      </UserSetupProvider>
-    </AuthProvider>
-  </QueryClientProvider>
+    <I18nextProvider i18n={i18n}>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <UserSetupProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/signup" element={<SignUp />} />
+                  <Route path="/today" element={
+                    <RequireAuth>
+                      <Today />
+                    </RequireAuth>
+                  } />
+                  <Route path="/tasks" element={
+                    <RequireAuth>
+                      <Today />
+                    </RequireAuth>
+                  } />
+                  <Route path="/calendar" element={
+                    <RequireAuth>
+                      <Calendar />
+                    </RequireAuth>
+                  } />
+                  <Route path="/projects" element={
+                    <RequireAuth>
+                      <Projects />
+                    </RequireAuth>
+                  } />
+                  <Route path="/projects/:id" element={
+                    <RequireAuth>
+                      <ProjectDetails />
+                    </RequireAuth>
+                  } />
+                  <Route path="/profile" element={
+                    <RequireAuth>
+                      <Profile />
+                    </RequireAuth>
+                  } />
+                  <Route path="/settings" element={
+                    <RequireAuth>
+                      <Settings />
+                    </RequireAuth>
+                  } />
+                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </BrowserRouter>
+            </TooltipProvider>
+          </UserSetupProvider>
+        </AuthProvider>
+      </QueryClientProvider>
+    </I18nextProvider>
   )
 };
 

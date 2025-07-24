@@ -18,8 +18,12 @@ i18n
     resources,
     lng: localStorage.getItem('language') || 'en',
     fallbackLng: 'en',
+    debug: false,
     interpolation: {
       escapeValue: false
+    },
+    react: {
+      useSuspense: false
     }
   });
 
