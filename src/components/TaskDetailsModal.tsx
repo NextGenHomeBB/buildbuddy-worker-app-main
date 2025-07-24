@@ -23,24 +23,29 @@ export function TaskDetailsModal({ task, isOpen, onClose }: TaskDetailsModalProp
       
       setLoading(true)
       try {
-        const { data, error } = await supabase
+        // First get the basic task data to check phase_id
+        const { data: taskData, error: taskError } = await supabase
           .from('tasks')
           .select(`
+            phase_id,
+            project_id,
             projects (name),
             project_phases (name)
           `)
           .eq('id', task.id)
           .single()
 
-        if (error) {
-          console.error('Error fetching project info:', error)
+        if (taskError) {
+          console.error('Error fetching task data:', taskError)
           return
         }
 
-        if (data) {
+        console.log('Task data:', taskData) // Debug log
+
+        if (taskData) {
           setProjectInfo({
-            name: (data.projects as any)?.name || 'Unknown Project',
-            phase: (data.project_phases as any)?.name || 'Unknown Phase'
+            name: (taskData.projects as any)?.name || 'Unknown Project',
+            phase: (taskData.project_phases as any)?.name || (taskData.phase_id ? 'Phase Not Found' : 'No Phase Assigned')
           })
         }
       } catch (error) {
