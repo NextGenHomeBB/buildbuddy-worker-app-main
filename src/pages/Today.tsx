@@ -9,13 +9,17 @@ import { ShiftTracker } from '@/components/ShiftTracker'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { LogOut, Calendar, User, Settings, Menu, ArrowRight } from 'lucide-react'
+import { LogOut, Calendar, User, Settings, Menu, ArrowRight, History, Clock } from 'lucide-react'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Badge } from '@/components/ui/badge'
 import { supabase } from '@/lib/supabase'
 
 export default function Today() {
   const { user, signOut } = useAuth()
   const { tasks, isLoading, error } = useMyTasks()
   const [profileName, setProfileName] = useState<string>('')
+  const [completedTasksHistory, setCompletedTasksHistory] = useState<any[]>([])
+  const [historyLoading, setHistoryLoading] = useState(false)
   const navigate = useNavigate()
 
   // Fetch user profile name
@@ -50,6 +54,42 @@ export default function Today() {
 
   const handleSignOut = async () => {
     await signOut()
+  }
+
+  const fetchCompletedTasksHistory = async () => {
+    if (!user) return
+    
+    setHistoryLoading(true)
+    try {
+      const { data, error } = await supabase
+        .from('tasks')
+        .select(`
+          id,
+          title,
+          description,
+          completed_at,
+          project_id,
+          projects (
+            name
+          )
+        `)
+        .eq('assignee', user.id)
+        .eq('status', 'completed')
+        .not('completed_at', 'is', null)
+        .order('completed_at', { ascending: false })
+        .limit(20)
+
+      if (error) {
+        console.error('Error fetching completed tasks:', error)
+        return
+      }
+
+      setCompletedTasksHistory(data || [])
+    } catch (error) {
+      console.error('Error fetching completed tasks history:', error)
+    } finally {
+      setHistoryLoading(false)
+    }
   }
 
   if (isLoading) {
@@ -151,6 +191,88 @@ export default function Today() {
       {/* Shift Tracker Section */}
       <div className="px-4 mb-6">
         <ShiftTracker />
+      </div>
+
+      {/* History Button */}
+      <div className="px-4 mb-6">
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button 
+              variant="outline" 
+              className="w-full justify-between"
+              onClick={fetchCompletedTasksHistory}
+            >
+              <div className="flex items-center gap-2">
+                <History className="h-4 w-4" />
+                <span>Task History</span>
+              </div>
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <History className="h-5 w-5" />
+                Completed Tasks History
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-3">
+              {historyLoading ? (
+                <div className="text-center py-8">
+                  <div className="w-6 h-6 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin mx-auto mb-2"></div>
+                  <p className="text-sm text-gray-500">Loading history...</p>
+                </div>
+              ) : completedTasksHistory.length === 0 ? (
+                <div className="text-center py-8">
+                  <Clock className="h-8 w-8 text-gray-300 mx-auto mb-2" />
+                  <p className="text-sm text-gray-500">No completed tasks yet</p>
+                </div>
+              ) : (
+                completedTasksHistory.map((task) => (
+                  <div key={task.id} className="p-3 border rounded-lg bg-gray-50">
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <h4 className="font-medium text-sm text-gray-900 line-clamp-2">
+                        {task.title}
+                      </h4>
+                      <Badge variant="secondary" className="text-xs">
+                        ✓ Done
+                      </Badge>
+                    </div>
+                    
+                    {task.description && (
+                      <p className="text-xs text-gray-600 mb-2 line-clamp-2">
+                        {task.description}
+                      </p>
+                    )}
+                    
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-1 text-xs text-gray-500">
+                        <Calendar className="h-3 w-3" />
+                        <span>
+                          Completed: {new Date(task.completed_at).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric'
+                          })} at {new Date(task.completed_at).toLocaleTimeString('en-US', {
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </span>
+                      </div>
+                      
+                      {task.projects?.name && (
+                        <div className="flex items-center gap-1 text-xs text-gray-500">
+                          <ArrowRight className="h-3 w-3" />
+                          <span>Project: {task.projects.name}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Tasks Section */}
