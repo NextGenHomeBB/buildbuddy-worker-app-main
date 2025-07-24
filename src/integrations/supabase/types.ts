@@ -356,6 +356,59 @@ export type Database = {
         }
         Relationships: []
       }
+      task_relations: {
+        Row: {
+          created_at: string | null
+          dest_task: string | null
+          id: string
+          relation: string | null
+          src_task: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          dest_task?: string | null
+          id?: string
+          relation?: string | null
+          src_task?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          dest_task?: string | null
+          id?: string
+          relation?: string | null
+          src_task?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_relations_dest_task_fkey"
+            columns: ["dest_task"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "task_relations_dest_task_fkey"
+            columns: ["dest_task"]
+            isOneToOne: false
+            referencedRelation: "worker.my_tasks_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "task_relations_src_task_fkey"
+            columns: ["src_task"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "task_relations_src_task_fkey"
+            columns: ["src_task"]
+            isOneToOne: false
+            referencedRelation: "worker.my_tasks_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tasks: {
         Row: {
           assignee: string | null

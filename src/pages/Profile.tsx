@@ -320,7 +320,7 @@ export default function Profile() {
               </AlertDialog>
             </div>
             <CardTitle className="text-xl">
-              {user?.user_metadata?.full_name || 'Worker'}
+              {fullName || user?.user_metadata?.full_name || 'Worker'}
             </CardTitle>
             <div className="flex flex-wrap gap-1 justify-center">
               {[...selectedRoles, ...customRoles].map((role, index) => (

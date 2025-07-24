@@ -19,6 +19,7 @@ import Projects from "./pages/Projects";
 import ProjectDetails from "./pages/ProjectDetails";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
+import TaskMap from "./pages/TaskMap";
 import NotFound from "./pages/NotFound";
 import { registerOnlineListener } from "@/lib/offlineQueue";
 
@@ -90,6 +91,11 @@ const App = () => {
                   <Route path="/settings" element={
                     <RequireAuth>
                       <Settings />
+                    </RequireAuth>
+                  } />
+                  <Route path="/map" element={
+                    <RequireAuth>
+                      <TaskMap />
                     </RequireAuth>
                   } />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
