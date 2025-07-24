@@ -77,6 +77,8 @@ export function AddTaskDialog({ trigger, onClose, defaultListId }: AddTaskDialog
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['my-tasks'] })
+      queryClient.invalidateQueries({ queryKey: ['tasks'] })
+      queryClient.invalidateQueries({ queryKey: ['taskLists'] })
       toast({
         title: t('today.taskCompleted'),
         description: 'Task created successfully',
