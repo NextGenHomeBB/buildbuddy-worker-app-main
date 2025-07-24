@@ -91,7 +91,7 @@ export default function Login() {
             </div>
           </div>
           <CardTitle className="text-2xl xs:text-3xl font-bold text-construction-gray-900">
-            Building-Buddy
+            BuildingBuddy
           </CardTitle>
           <CardDescription className="text-base xs:text-lg text-construction-gray-600">
             Worker Portal
