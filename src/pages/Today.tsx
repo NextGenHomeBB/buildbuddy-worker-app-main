@@ -9,7 +9,8 @@ import { ShiftTracker } from '@/components/ShiftTracker'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { LogOut, Calendar, User, Settings, Menu, ArrowRight, History, Clock } from 'lucide-react'
+import { Switch } from '@/components/ui/switch'
+import { LogOut, Calendar, User, Settings, Menu, ArrowRight, History, Clock, Eye, EyeOff } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Badge } from '@/components/ui/badge'
 import { supabase } from '@/lib/supabase'
@@ -20,6 +21,7 @@ export default function Today() {
   const [profileName, setProfileName] = useState<string>('')
   const [completedTasksHistory, setCompletedTasksHistory] = useState<any[]>([])
   const [historyLoading, setHistoryLoading] = useState(false)
+  const [showCompletedTasks, setShowCompletedTasks] = useState(true)
   const navigate = useNavigate()
 
   // Fetch user profile name
@@ -118,6 +120,10 @@ export default function Today() {
   const totalTasks = tasks.length
   const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0
 
+  // Filter tasks based on toggle state
+  const filteredTasks = showCompletedTasks ? tasks : tasks.filter(t => t.status !== 'completed')
+  const hiddenTasksCount = tasks.length - filteredTasks.length
+
   // Use profile name if available, otherwise fallback to email username
   const displayName = profileName || user?.email?.split('@')[0] || 'User'
 
@@ -193,8 +199,30 @@ export default function Today() {
         <ShiftTracker />
       </div>
 
-      {/* History Button */}
-      <div className="px-4 mb-6">
+      {/* Controls Section */}
+      <div className="px-4 mb-6 space-y-3">
+        {/* Task Visibility Toggle */}
+        <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+          <div className="flex items-center gap-2">
+            {showCompletedTasks ? (
+              <Eye className="h-4 w-4 text-muted-foreground" />
+            ) : (
+              <EyeOff className="h-4 w-4 text-muted-foreground" />
+            )}
+            <span className="text-sm font-medium">Show Completed Tasks</span>
+            {!showCompletedTasks && hiddenTasksCount > 0 && (
+              <Badge variant="secondary" className="text-xs">
+                {hiddenTasksCount} hidden
+              </Badge>
+            )}
+          </div>
+          <Switch
+            checked={showCompletedTasks}
+            onCheckedChange={setShowCompletedTasks}
+          />
+        </div>
+
+        {/* History Button */}
         <Dialog>
           <DialogTrigger asChild>
             <Button 
@@ -277,17 +305,24 @@ export default function Today() {
 
       {/* Tasks Section */}
       <div className="px-4">
-        {tasks.length === 0 ? (
+        {filteredTasks.length === 0 ? (
           <div className="text-center py-12">
             <Calendar className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No tasks for today</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              {tasks.length === 0 ? "No tasks for today" : "No tasks to show"}
+            </h3>
             <p className="text-gray-500">
-              You're all caught up! Check back later for new assignments.
+              {tasks.length === 0 
+                ? "You're all caught up! Check back later for new assignments."
+                : !showCompletedTasks 
+                  ? "All tasks are completed. Toggle 'Show Completed Tasks' to see them."
+                  : "No tasks match the current filter."
+              }
             </p>
           </div>
         ) : (
           <div className="space-y-3">
-            {tasks.map((task) => (
+            {filteredTasks.map((task) => (
               <TaskCard key={task.id} task={task} />
             ))}
           </div>
