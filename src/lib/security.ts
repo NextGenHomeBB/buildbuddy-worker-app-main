@@ -33,6 +33,19 @@ export const profileValidationSchema = z.object({
     .refine(val => sanitizeText(val).length > 0, 'Name cannot be empty after sanitization')
 })
 
+// Enhanced validation schemas for security
+export const userRoleValidationSchema = z.object({
+  user_id: z.string().uuid('Invalid user ID'),
+  role: z.enum(['admin', 'manager', 'worker'])
+})
+
+export const projectAssignmentSchema = z.object({
+  project_id: z.string().uuid('Invalid project ID'),
+  assignee: z.string().uuid('Invalid assignee ID').optional(),
+  title: z.string().min(1).max(200),
+  description: z.string().max(2000).optional()
+})
+
 // Rate limiting for sensitive operations
 export class RateLimiter {
   private attempts: Map<string, number[]> = new Map()
@@ -71,5 +84,37 @@ export class RateLimiter {
   }
 }
 
-// Global rate limiter instance
+// Global rate limiter instances
 export const authRateLimiter = new RateLimiter(5, 15 * 60 * 1000) // 5 attempts per 15 minutes
+export const taskCreationLimiter = new RateLimiter(10, 5 * 60 * 1000) // 10 tasks per 5 minutes
+export const roleChangeLimiter = new RateLimiter(3, 60 * 60 * 1000) // 3 role changes per hour
+
+// Security utility functions
+export const validateOperation = (operation: string, userId: string): boolean => {
+  const key = `${operation}:${userId}`
+  
+  switch (operation) {
+    case 'auth':
+      return authRateLimiter.isAllowed(key)
+    case 'task_creation':
+      return taskCreationLimiter.isAllowed(key)
+    case 'role_change':
+      return roleChangeLimiter.isAllowed(key)
+    default:
+      return true
+  }
+}
+
+// Enhanced logging for security events
+export const logSecurityEvent = (event: {
+  action: string
+  userId?: string
+  details?: Record<string, any>
+  severity: 'low' | 'medium' | 'high' | 'critical'
+}) => {
+  console.log(`[SECURITY] ${event.severity.toUpperCase()}: ${event.action}`, {
+    userId: event.userId,
+    timestamp: new Date().toISOString(),
+    details: event.details
+  })
+}
