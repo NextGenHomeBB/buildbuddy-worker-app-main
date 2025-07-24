@@ -1,19 +1,22 @@
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useMemo } from 'react'
 import {
   DndContext,
   DragOverlay,
   DragStartEvent,
   DragEndEvent,
+  DragOverEvent,
   closestCenter,
   pointerWithin,
-  getFirstCollision,
+  rectIntersection,
+  CollisionDetection,
+  UniqueIdentifier,
 } from '@dnd-kit/core'
 import { useGesture } from '@use-gesture/react'
 import { TaskNode } from './TaskNode'
 import { RelationDialog } from './RelationDialog'
 import { TaskMapTask, useTaskMap } from '@/hooks/useTaskMap'
 import { Button } from '@/components/ui/button'
-import { Eye, EyeOff, Trash2 } from 'lucide-react'
+import { Eye, EyeOff, Trash2, Move } from 'lucide-react'
 import { useIsMobile } from '@/hooks/use-mobile'
 
 export function TaskMapCanvas() {
@@ -21,10 +24,13 @@ export function TaskMapCanvas() {
   const canvasRef = useRef<HTMLDivElement>(null)
   const [transform, setTransform] = useState({ x: 0, y: 0, scale: 1 })
   const [activeTask, setActiveTask] = useState<TaskMapTask | null>(null)
+  const [overId, setOverId] = useState<UniqueIdentifier | null>(null)
   const [dropTarget, setDropTarget] = useState<TaskMapTask | null>(null)
   const [showRelationDialog, setShowRelationDialog] = useState(false)
   const [showMiniMap, setShowMiniMap] = useState(true)
   const [selectedRelation, setSelectedRelation] = useState<string | null>(null)
+  const [isDragging, setIsDragging] = useState(false)
+  const [isPanning, setIsPanning] = useState(false)
 
   const { tasks, relations, createRelation, deleteRelation, isCreating } = useTaskMap()
 
@@ -35,21 +41,47 @@ export function TaskMapCanvas() {
     const col = index % cols
     const row = Math.floor(index / cols)
     return {
-      x: col * spacing + 20,
-      y: row * spacing + 20
+      x: col * spacing + 40,
+      y: row * spacing + 40
     }
   }, [isMobile])
+
+  // Custom collision detection for better drag experience
+  const customCollisionDetection: CollisionDetection = useCallback((args) => {
+    if (!activeTask) return []
+    
+    // First try pointer collision for better responsiveness
+    const pointerCollisions = pointerWithin(args)
+    if (pointerCollisions.length > 0) {
+      return pointerCollisions.filter(collision => collision.id !== activeTask.id)
+    }
+    
+    // Fallback to rectangle intersection
+    const intersectionCollisions = rectIntersection(args)
+    return intersectionCollisions.filter(collision => collision.id !== activeTask.id)
+  }, [activeTask])
 
   // Pan and zoom gestures
   useGesture(
     {
-      onDrag: ({ offset: [x, y], pinching }) => {
-        if (!pinching) {
+      onDragStart: () => {
+        if (!isDragging) {
+          setIsPanning(true)
+        }
+      },
+      onDrag: ({ offset: [x, y], pinching, tap }) => {
+        if (!pinching && !isDragging && !tap) {
           setTransform(prev => ({ ...prev, x, y }))
         }
       },
+      onDragEnd: () => {
+        setIsPanning(false)
+      },
       onPinch: ({ offset: [scale] }) => {
-        setTransform(prev => ({ ...prev, scale: Math.max(0.5, Math.min(2, scale)) }))
+        setTransform(prev => ({ 
+          ...prev, 
+          scale: Math.max(0.3, Math.min(3, scale)) 
+        }))
       },
     },
     {
@@ -57,10 +89,13 @@ export function TaskMapCanvas() {
       drag: { 
         from: () => [transform.x, transform.y],
         filterTaps: true,
+        threshold: 5,
+        preventScrollAxis: 'xy',
       },
       pinch: { 
         from: () => [transform.scale, 0],
-        scaleBounds: { min: 0.5, max: 2 },
+        scaleBounds: { min: 0.3, max: 3 },
+        preventDefault: true,
       },
     }
   )
@@ -68,11 +103,20 @@ export function TaskMapCanvas() {
   const handleDragStart = (event: DragStartEvent) => {
     const task = tasks.find(t => t.id === event.active.id)
     setActiveTask(task || null)
+    setIsDragging(true)
+    setIsPanning(false)
+  }
+
+  const handleDragOver = (event: DragOverEvent) => {
+    const { over } = event
+    setOverId(over?.id || null)
   }
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event
     setActiveTask(null)
+    setIsDragging(false)
+    setOverId(null)
 
     if (over && active.id !== over.id) {
       const srcTask = tasks.find(t => t.id === active.id)
@@ -169,18 +213,34 @@ export function TaskMapCanvas() {
   return (
     <div className="relative w-full h-full overflow-hidden bg-background">
       <DndContext
-        collisionDetection={closestCenter}
+        collisionDetection={customCollisionDetection}
         onDragStart={handleDragStart}
+        onDragOver={handleDragOver}
         onDragEnd={handleDragEnd}
       >
         <div
           ref={canvasRef}
-          className="relative w-full h-full touch-none"
+          className={`relative w-full h-full transition-none ${
+            isPanning ? 'cursor-grabbing' : isDragging ? 'cursor-default' : 'cursor-grab'
+          }`}
           style={{
             transform: `translate(${transform.x}px, ${transform.y}px) scale(${transform.scale})`,
             transformOrigin: '0 0',
+            touchAction: 'none',
           }}
         >
+          {/* Background grid for better visual reference */}
+          <div 
+            className="absolute inset-0 opacity-10"
+            style={{
+              backgroundImage: `
+                linear-gradient(to right, #e5e7eb 1px, transparent 1px),
+                linear-gradient(to bottom, #e5e7eb 1px, transparent 1px)
+              `,
+              backgroundSize: '40px 40px'
+            }}
+          />
+
           {/* SVG for relation lines */}
           <svg
             className="absolute inset-0 w-full h-full pointer-events-none"
@@ -205,36 +265,64 @@ export function TaskMapCanvas() {
           <div className="relative" style={{ zIndex: 2 }}>
             {tasks.map((task, index) => {
               const position = getTaskPosition(index)
+              const isOver = overId === task.id
+              const isActive = activeTask?.id === task.id
+              
               return (
                 <div
                   key={task.id}
-                  className="absolute"
+                  className={`absolute transition-all duration-150 ${
+                    isOver && !isActive ? 'scale-105 z-10' : ''
+                  }`}
                   style={{
                     left: position.x,
                     top: position.y,
                   }}
                 >
-                  <TaskNode task={task} />
+                  <TaskNode 
+                    task={task} 
+                    isDropTarget={isOver && !isActive}
+                    isBeingDragged={isActive}
+                  />
                 </div>
               )
             })}
           </div>
         </div>
 
-        <DragOverlay>
-          {activeTask && <TaskNode task={activeTask} isDragOverlay />}
+        <DragOverlay dropAnimation={null}>
+          {activeTask && (
+            <div className="relative">
+              <TaskNode task={activeTask} isDragOverlay />
+              <div className="absolute -top-8 left-1/2 transform -translate-x-1/2">
+                <div className="bg-primary text-primary-foreground px-2 py-1 rounded text-xs font-medium whitespace-nowrap">
+                  Drop on task to link
+                </div>
+              </div>
+            </div>
+          )}
         </DragOverlay>
       </DndContext>
 
-      {/* MiniMap Toggle */}
-      <Button
-        variant="outline"
-        size="sm"
-        className="absolute bottom-4 right-4 z-10"
-        onClick={() => setShowMiniMap(!showMiniMap)}
-      >
-        {showMiniMap ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-      </Button>
+      {/* Controls */}
+      <div className="absolute bottom-4 right-4 z-10 flex flex-col gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setTransform({ x: 0, y: 0, scale: 1 })}
+          title="Reset view"
+        >
+          <Move className="w-4 h-4" />
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setShowMiniMap(!showMiniMap)}
+          title={showMiniMap ? "Hide minimap" : "Show minimap"}
+        >
+          {showMiniMap ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+        </Button>
+      </div>
 
       {/* MiniMap */}
       {showMiniMap && (

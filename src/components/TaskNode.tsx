@@ -7,9 +7,11 @@ import { TaskMapTask } from '@/hooks/useTaskMap'
 interface TaskNodeProps {
   task: TaskMapTask
   isDragOverlay?: boolean
+  isDropTarget?: boolean
+  isBeingDragged?: boolean
 }
 
-export function TaskNode({ task, isDragOverlay }: TaskNodeProps) {
+export function TaskNode({ task, isDragOverlay, isDropTarget, isBeingDragged }: TaskNodeProps) {
   const {
     attributes,
     listeners,
@@ -43,10 +45,13 @@ export function TaskNode({ task, isDragOverlay }: TaskNodeProps) {
       {...listeners}
       {...attributes}
       className={`
-        w-36 p-3 cursor-grab touch-none select-none transition-all
-        ${isDragging || isDragOverlay ? 'opacity-50 shadow-lg scale-105' : 'opacity-100'}
-        ${isDragOverlay ? 'rotate-2' : ''}
-        hover:shadow-md active:cursor-grabbing
+        w-36 p-3 cursor-grab touch-none select-none transition-all duration-200
+        ${isDragging || isDragOverlay ? 'opacity-60 shadow-lg scale-105' : 'opacity-100'}
+        ${isDragOverlay ? 'rotate-2 border-primary shadow-2xl' : ''}
+        ${isDropTarget ? 'border-green-400 border-2 bg-green-50 shadow-lg' : ''}
+        ${isBeingDragged ? 'opacity-30' : ''}
+        hover:shadow-md hover:scale-105 active:cursor-grabbing
+        focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2
       `}
     >
       <div className="space-y-2">
