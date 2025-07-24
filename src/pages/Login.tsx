@@ -89,6 +89,9 @@ export default function Login() {
               className="h-24 w-auto"
             />
           </div>
+          <CardTitle className="text-2xl xs:text-3xl font-bold text-construction-gray-900 text-center">
+            BuildingBuddy
+          </CardTitle>
         </CardHeader>
         <CardContent className="pt-2">
           <form onSubmit={handleSubmit} className="space-y-6">
