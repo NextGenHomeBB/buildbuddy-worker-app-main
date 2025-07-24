@@ -8,11 +8,13 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { useToast } from '@/hooks/use-toast'
 import { HardHat, Wrench } from 'lucide-react'
+import { supabase } from '@/lib/supabase'
 
 export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
+  const [isSignUp, setIsSignUp] = useState(false)
   const { user, signIn } = useAuth()
   const { toast } = useToast()
 
@@ -21,23 +23,53 @@ export default function Login() {
     return <Navigate to="/today" replace />
   }
 
+  const handleSignUp = async (email: string, password: string) => {
+    const redirectUrl = `${window.location.origin}/`
+    
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: redirectUrl
+      }
+    })
+    return { error }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
 
-    const { error } = await signIn(email, password)
-
-    if (error) {
-      toast({
-        title: 'Login Failed',
-        description: error.message,
-        variant: 'destructive',
-      })
+    if (isSignUp) {
+      const { error } = await handleSignUp(email, password)
+      
+      if (error) {
+        toast({
+          title: 'Sign Up Failed',
+          description: error.message,
+          variant: 'destructive',
+        })
+      } else {
+        toast({
+          title: 'Account Created!',
+          description: 'Please check your email to verify your account.',
+        })
+      }
     } else {
-      toast({
-        title: 'Welcome back!',
-        description: 'Successfully logged in',
-      })
+      const { error } = await signIn(email, password)
+
+      if (error) {
+        toast({
+          title: 'Login Failed',
+          description: error.message,
+          variant: 'destructive',
+        })
+      } else {
+        toast({
+          title: 'Welcome back!',
+          description: 'Successfully logged in',
+        })
+      }
     }
 
     setLoading(false)
@@ -110,13 +142,26 @@ export default function Login() {
               {loading ? (
                 <>
                   <div className="w-5 h-5 border-2 border-construction-yellow-foreground/30 border-t-construction-yellow-foreground rounded-full animate-spin mr-2" />
-                  Signing In...
+                  {isSignUp ? 'Creating Account...' : 'Signing In...'}
                 </>
               ) : (
-                'Sign In to Start Work'
+                isSignUp ? 'Create Account' : 'Sign In to Start Work'
               )}
             </Button>
           </form>
+
+          <div className="mt-6 text-center">
+            <p className="text-sm text-construction-gray-600">
+              {isSignUp ? 'Already have an account?' : "Don't have an account?"}
+              <button
+                type="button"
+                onClick={() => setIsSignUp(!isSignUp)}
+                className="ml-2 font-medium text-construction-yellow hover:text-construction-yellow/80 underline"
+              >
+                {isSignUp ? 'Sign In' : 'Sign Up'}
+              </button>
+            </p>
+          </div>
 
         </CardContent>
       </Card>
