@@ -9,9 +9,6 @@ export interface TaskList {
   owner_id: string
   created_at: string
   updated_at: string
-  open_count: number
-  done_count: number
-  total_count: number
 }
 
 export function useTaskLists() {
@@ -19,7 +16,7 @@ export function useTaskLists() {
     queryKey: ['taskLists'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('worker.task_lists_v')
+        .from('task_lists')
         .select('*')
         .order('created_at', { ascending: true })
 

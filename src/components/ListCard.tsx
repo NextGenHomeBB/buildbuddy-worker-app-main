@@ -1,5 +1,6 @@
 import { Card, CardContent } from '@/components/ui/card'
 import { TaskList } from '@/hooks/useTaskLists'
+import { useTasksByList } from '@/hooks/useTasksByList'
 import { NavLink } from 'react-router-dom'
 
 interface ListCardProps {
@@ -7,6 +8,9 @@ interface ListCardProps {
 }
 
 export function ListCard({ list }: ListCardProps) {
+  const { data: tasks } = useTasksByList(list.id)
+  const todoCount = tasks?.filter(task => task.status === 'todo').length || 0
+
   return (
     <NavLink to={`/lists/${list.id}`} className="block">
       <Card className="hover:shadow-md transition-shadow">
@@ -21,7 +25,7 @@ export function ListCard({ list }: ListCardProps) {
                 {list.name}
               </h3>
               <p className="text-sm text-muted-foreground">
-                {list.open_count} tasks
+                {todoCount} tasks
               </p>
             </div>
           </div>
