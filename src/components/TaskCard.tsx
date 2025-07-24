@@ -2,13 +2,11 @@
 import { useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Button } from '@/components/ui/button'
 import { WorkerTask } from '@/lib/supabase'
 import { useMyTasks } from '@/hooks/useMyTasks'
 import { TaskDetailsModal } from '@/components/TaskDetailsModal'
-import { ArrowRight, AlertTriangle, Minus, Circle, CheckCircle } from 'lucide-react'
+import { ArrowRight, AlertTriangle, Minus, Circle } from 'lucide-react'
 import { format } from 'date-fns'
-import { useNavigate } from 'react-router-dom'
 
 interface TaskCardProps {
   task: WorkerTask
@@ -18,22 +16,10 @@ interface TaskCardProps {
 export function TaskCard({ task, showDueDate = false }: TaskCardProps) {
   const { updateTaskStatus, isUpdating } = useMyTasks()
   const [isDetailsOpen, setIsDetailsOpen] = useState(false)
-  const navigate = useNavigate()
 
   const handleStatusChange = (checked: boolean) => {
     const newStatus = checked ? 'completed' : 'pending'
     updateTaskStatus({ taskId: task.id, status: newStatus })
-    if (checked) {
-      // Navigate to projects page when task is completed
-      setTimeout(() => navigate('/projects'), 1000)
-    }
-  }
-
-  const handleCompleteTask = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    updateTaskStatus({ taskId: task.id, status: 'completed' })
-    // Navigate to projects page when task is completed
-    setTimeout(() => navigate('/projects'), 1000)
   }
 
   const handleCardClick = () => {
@@ -133,32 +119,18 @@ export function TaskCard({ task, showDueDate = false }: TaskCardProps) {
                     <span className="text-xs text-gray-400">
                       Project Task
                     </span>
-                   )}
-                 </div>
-               </div>
-             </div>
-             
-             <div className="flex items-center gap-2">
-               {task.status !== 'completed' && (
-                 <Button
-                   size="sm"
-                   onClick={handleCompleteTask}
-                   disabled={isUpdating}
-                   className="bg-green-600 hover:bg-green-700 text-white"
-                 >
-                   <CheckCircle className="h-4 w-4 mr-1" />
-                   Complete
-                 </Button>
-               )}
-               
-               <button
-                 className="p-2 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brandBlue rounded hover:bg-gray-50 transition-colors"
-                 aria-label="View task details"
-                 onClick={handleCardClick}
-               >
-                 <ArrowRight className="h-5 w-5 text-gray-400 hover:text-gray-600 transition-colors" />
-               </button>
-             </div>
+                  )}
+                </div>
+              </div>
+            </div>
+            
+            <button
+              className="p-2 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brandBlue rounded hover:bg-gray-50 transition-colors"
+              aria-label="View task details"
+              onClick={handleCardClick}
+            >
+              <ArrowRight className="h-5 w-5 text-gray-400 hover:text-gray-600 transition-colors" />
+            </button>
           </div>
         </CardContent>
       </Card>
