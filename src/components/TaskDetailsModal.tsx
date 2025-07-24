@@ -1,9 +1,10 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { WorkerTask } from '@/lib/supabase'
-import { AlertTriangle, Minus, Circle, Clock, Calendar, CheckCircle2, X } from 'lucide-react'
+import { WorkerTask, supabase } from '@/lib/supabase'
+import { AlertTriangle, Minus, Circle, Clock, Calendar, CheckCircle2, X, Building, Layers } from 'lucide-react'
 import { format } from 'date-fns'
+import { useState, useEffect } from 'react'
 
 interface TaskDetailsModalProps {
   task: WorkerTask | null
@@ -12,6 +13,46 @@ interface TaskDetailsModalProps {
 }
 
 export function TaskDetailsModal({ task, isOpen, onClose }: TaskDetailsModalProps) {
+  const [projectInfo, setProjectInfo] = useState<{ name: string; phase: string } | null>(null)
+  const [loading, setLoading] = useState(false)
+
+  // Fetch project and phase information
+  useEffect(() => {
+    const fetchProjectInfo = async () => {
+      if (!task || !isOpen) return
+      
+      setLoading(true)
+      try {
+        const { data, error } = await supabase
+          .from('tasks')
+          .select(`
+            projects (name),
+            project_phases (name)
+          `)
+          .eq('id', task.id)
+          .single()
+
+        if (error) {
+          console.error('Error fetching project info:', error)
+          return
+        }
+
+        if (data) {
+          setProjectInfo({
+            name: (data.projects as any)?.name || 'Unknown Project',
+            phase: (data.project_phases as any)?.name || 'Unknown Phase'
+          })
+        }
+      } catch (error) {
+        console.error('Error fetching project info:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchProjectInfo()
+  }, [task, isOpen])
+
   if (!task) return null
 
   const getPriorityLabel = (priority: WorkerTask['priority']) => {
@@ -117,6 +158,36 @@ export function TaskDetailsModal({ task, isOpen, onClose }: TaskDetailsModalProp
               <p className="text-gray-600 leading-relaxed">
                 {task.description}
               </p>
+            </div>
+          )}
+
+          {/* Project and Phase Information */}
+          {projectInfo && (
+            <div className="space-y-3">
+              <h4 className="text-sm font-medium text-gray-900">Project & Phase</h4>
+              <div className="grid grid-cols-1 gap-3 text-sm">
+                {/* Project */}
+                <div className="flex items-center justify-between py-2 border-b border-gray-100">
+                  <span className="text-gray-500 flex items-center gap-2">
+                    <Building className="h-4 w-4" />
+                    Project
+                  </span>
+                  <span className="text-gray-900 font-medium">
+                    {projectInfo.name}
+                  </span>
+                </div>
+
+                {/* Phase */}
+                <div className="flex items-center justify-between py-2 border-b border-gray-100">
+                  <span className="text-gray-500 flex items-center gap-2">
+                    <Layers className="h-4 w-4" />
+                    Phase
+                  </span>
+                  <span className="text-gray-900 font-medium">
+                    {projectInfo.phase}
+                  </span>
+                </div>
+              </div>
             </div>
           )}
 
