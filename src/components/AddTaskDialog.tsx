@@ -1,5 +1,6 @@
 
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -18,6 +19,7 @@ interface AddTaskDialogProps {
 }
 
 export function AddTaskDialog({ trigger }: AddTaskDialogProps) {
+  const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
@@ -72,7 +74,7 @@ export function AddTaskDialog({ trigger }: AddTaskDialogProps) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['my-tasks'] })
       toast({
-        title: 'Success',
+        title: t('today.taskCompleted'),
         description: 'Task created successfully',
       })
       
@@ -85,7 +87,7 @@ export function AddTaskDialog({ trigger }: AddTaskDialogProps) {
     onError: (error) => {
       console.error('Task creation error:', error)
       toast({
-        title: 'Error',
+        title: t('profile.error'),
         description: `Failed to create task: ${error.message}`,
         variant: 'destructive',
       })
@@ -97,7 +99,7 @@ export function AddTaskDialog({ trigger }: AddTaskDialogProps) {
     
     if (!user) {
       toast({
-        title: 'Error',
+        title: t('profile.error'),
         description: 'You must be logged in to create tasks',
         variant: 'destructive',
       })
@@ -113,7 +115,7 @@ export function AddTaskDialog({ trigger }: AddTaskDialogProps) {
 
     if (!validation.success) {
       toast({
-        title: "Validation Error",
+        title: t('profile.validationError'),
         description: validation.error.errors[0]?.message || "Invalid input",
         variant: "destructive",
       })
@@ -135,7 +137,7 @@ export function AddTaskDialog({ trigger }: AddTaskDialogProps) {
       size="icon"
     >
       <Plus className="w-6 h-6" />
-      <span className="sr-only">Add new task</span>
+      <span className="sr-only">{t('today.addTask')}</span>
     </Button>
   )
 
@@ -146,7 +148,7 @@ export function AddTaskDialog({ trigger }: AddTaskDialogProps) {
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Add New Task</DialogTitle>
+          <DialogTitle>{t('today.addTask')}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
@@ -178,9 +180,9 @@ export function AddTaskDialog({ trigger }: AddTaskDialogProps) {
                 <SelectValue placeholder="Select priority" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="low">Low</SelectItem>
-                <SelectItem value="medium">Medium</SelectItem>
-                <SelectItem value="high">High</SelectItem>
+                <SelectItem value="low">{t('today.priority.low')}</SelectItem>
+                <SelectItem value="medium">{t('today.priority.medium')}</SelectItem>
+                <SelectItem value="high">{t('today.priority.high')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -192,14 +194,14 @@ export function AddTaskDialog({ trigger }: AddTaskDialogProps) {
               onClick={() => setOpen(false)}
               className="flex-1"
             >
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button
               type="submit"
               disabled={createTaskMutation.isPending || !title.trim()}
               className="flex-1"
             >
-              {createTaskMutation.isPending ? 'Creating...' : 'Create Task'}
+              {createTaskMutation.isPending ? 'Creating...' : t('common.add')}
             </Button>
           </div>
         </form>
