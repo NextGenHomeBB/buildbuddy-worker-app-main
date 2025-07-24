@@ -1,8 +1,11 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { useLanguage } from '@/hooks/useLanguage'
 import { useAuth } from '@/contexts/AuthContext'
 import { supabase } from '@/lib/supabase'
 import { MobileBottomNav } from '@/components/MobileBottomNav'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import { Button } from '@/components/ui/button'
 import { useToast } from '@/hooks/use-toast'
@@ -11,6 +14,8 @@ import { Bell, Moon, Globe, Shield, HelpCircle, Download, Clock } from 'lucide-r
 export default function Settings() {
   const { user } = useAuth()
   const { toast } = useToast()
+  const { t } = useTranslation()
+  const { currentLanguage, changeLanguage, availableLanguages } = useLanguage()
   const [isDownloading, setIsDownloading] = useState(false)
 
   const downloadTimeSheetStatement = async () => {
@@ -90,7 +95,7 @@ export default function Settings() {
       {/* Header */}
       <div className="bg-card border-b border-border p-4">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-2xl font-bold text-foreground">Settings</h1>
+          <h1 className="text-2xl font-bold text-foreground">{t('settings.title')}</h1>
         </div>
       </div>
 
@@ -173,13 +178,25 @@ export default function Settings() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Globe className="w-5 h-5" />
-              Language & Region
+              {t('settings.languageRegion')}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <Button variant="outline" className="w-full justify-start">
-              English (US)
-            </Button>
+            <Select value={currentLanguage} onValueChange={changeLanguage}>
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="z-50 bg-popover">
+                {availableLanguages.map((lang) => (
+                  <SelectItem key={lang.code} value={lang.code}>
+                    <div className="flex items-center gap-2">
+                      <span>{lang.flag}</span>
+                      <span>{lang.name}</span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </CardContent>
         </Card>
 

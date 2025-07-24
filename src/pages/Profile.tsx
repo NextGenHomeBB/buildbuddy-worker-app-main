@@ -1,4 +1,4 @@
-import { useAuth } from '@/contexts/AuthContext';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -13,7 +13,9 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
 import { profileValidationSchema, sanitizeText } from '@/lib/security';
+import { useAuth } from '@/contexts/AuthContext';
 export default function Profile() {
+  const { t } = useTranslation();
   const {
     user,
     signOut
@@ -31,17 +33,17 @@ export default function Profile() {
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
 
   const predefinedRoles = [
-    'Construction Worker',
-    'Electrician', 
-    'Plumber',
-    'Carpenter',
-    'Mason',
-    'Roofer',
-    'Painter',
-    'HVAC Technician',
-    'Heavy Equipment Operator',
-    'Site Supervisor',
-    'Project Manager'
+    t('roles.constructionWorker'),
+    t('roles.electrician'),
+    t('roles.plumber'),
+    t('roles.carpenter'),
+    t('roles.mason'),
+    t('roles.roofer'),
+    t('roles.painter'),
+    t('roles.hvacTechnician'),
+    t('roles.heavyEquipmentOperator'),
+    t('roles.siteSupervisor'),
+    t('roles.projectManager')
   ];
   useEffect(() => {
     const fetchProfile = async () => {
@@ -244,7 +246,7 @@ export default function Profile() {
       {/* Header */}
       <div className="bg-card border-b border-border p-4">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-2xl font-bold text-foreground">Profile</h1>
+          <h1 className="text-2xl font-bold text-foreground">{t('profile.title')}</h1>
         </div>
       </div>
 
@@ -306,7 +308,7 @@ export default function Profile() {
           <CardContent className="space-y-4">
             {/* Editable Name Field */}
             <div className="space-y-2">
-              <Label htmlFor="fullName" className="text-sm font-medium">Full Name</Label>
+              <Label htmlFor="fullName" className="text-sm font-medium">{t('profile.fullName')}</Label>
               {isEditing ? <div className="flex gap-2">
                   <Input id="fullName" value={fullName} onChange={e => setFullName(e.target.value)} placeholder="Enter your full name" className="flex-1" />
                   <Button size="sm" onClick={handleSaveProfile} disabled={isLoading}>
@@ -325,7 +327,7 @@ export default function Profile() {
             
             {/* Work Roles Field */}
             <div className="space-y-2">
-              <Label className="text-sm font-medium">Work Roles</Label>
+              <Label className="text-sm font-medium">{t('profile.workRoles')}</Label>
               {isEditing ? (
                 <div className="space-y-4">
                   {/* Predefined Roles Checkboxes */}
@@ -346,12 +348,12 @@ export default function Profile() {
 
                   {/* Custom Roles Section */}
                   <div className="space-y-2">
-                    <Label className="text-sm font-medium">Custom Roles</Label>
+                    <Label className="text-sm font-medium">{t('profile.customRoles')}</Label>
                     <div className="flex gap-2">
                       <Input
                         value={newCustomRole}
                         onChange={(e) => setNewCustomRole(e.target.value)}
-                        placeholder="Add a custom role"
+                        placeholder={t('profile.addCustomRole')}
                         onKeyPress={(e) => e.key === 'Enter' && handleAddCustomRole()}
                       />
                       <Button 
@@ -360,7 +362,7 @@ export default function Profile() {
                         onClick={handleAddCustomRole}
                         disabled={!newCustomRole.trim()}
                       >
-                        Add
+                        {t('common.add')}
                       </Button>
                     </div>
 
