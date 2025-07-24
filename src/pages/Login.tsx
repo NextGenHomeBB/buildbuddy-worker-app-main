@@ -118,16 +118,6 @@ export default function Login() {
             </Button>
           </form>
 
-          <div className="mt-8 text-center">
-            <div className="bg-construction-gray-50 rounded-lg p-4 border border-construction-gray-200">
-              <p className="text-sm text-construction-gray-600 font-medium mb-1">
-                Demo Account
-              </p>
-              <p className="text-xs text-construction-gray-500">
-                Use your seeded worker credentials to access the app
-              </p>
-            </div>
-          </div>
         </CardContent>
       </Card>
     </div>
