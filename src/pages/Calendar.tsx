@@ -3,13 +3,13 @@ import { Calendar } from '@/components/ui/calendar'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { format } from 'date-fns'
-import { useMyTasks } from '@/hooks/useMyTasks'
+import { useWorkerTasks } from '@/hooks/useWorkerTasks'
 import { TaskCard } from '@/components/TaskCard'
 import { MobileBottomNav } from '@/components/MobileBottomNav'
 
 export default function CalendarPage() {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date())
-  const { tasks, isLoading } = useMyTasks()
+  const { tasks, isLoading, error } = useWorkerTasks()
 
   // Filter tasks for the selected date
   const selectedDateTasks = selectedDate 
@@ -100,6 +100,10 @@ export default function CalendarPage() {
                 <div className="text-center py-8">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
                   <p className="mt-2 text-muted-foreground">Loading tasks...</p>
+                </div>
+              ) : error ? (
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground">Error loading tasks. Please try refreshing.</p>
                 </div>
               ) : selectedDateTasks.length > 0 ? (
                 <div className="space-y-3">

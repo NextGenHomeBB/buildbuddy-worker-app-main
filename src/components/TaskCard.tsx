@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import { WorkerTask } from '@/lib/supabase'
-import { useMyTasks } from '@/hooks/useMyTasks'
+import { useWorkerTasks } from '@/hooks/useWorkerTasks'
 import { TaskDetailsModal } from '@/components/TaskDetailsModal'
 import { ArrowRight, AlertTriangle, Minus, Circle } from 'lucide-react'
 import { format } from 'date-fns'
@@ -14,7 +14,7 @@ interface TaskCardProps {
 }
 
 export function TaskCard({ task, showDueDate = false }: TaskCardProps) {
-  const { updateTaskStatus, isUpdating } = useMyTasks()
+  const { updateTaskStatus, isUpdating } = useWorkerTasks()
   const [isDetailsOpen, setIsDetailsOpen] = useState(false)
 
   const handleStatusChange = (checked: boolean) => {
