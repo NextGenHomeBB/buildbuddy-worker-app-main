@@ -2,29 +2,44 @@ import { useEffect, useState } from 'react'
 import { LogOut, User, Settings } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
-import { useDailyTasks } from '@/hooks/useDailyTasks'
-import { DailyTaskCard } from '@/components/DailyTaskCard'
+import { useWorkerTasks } from '@/hooks/useWorkerTasks'
+import { TaskCard } from '@/components/TaskCard'
 import { MobileBottomNav } from '@/components/MobileBottomNav'
 import { ShiftTracker } from '@/components/ShiftTracker'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Calendar, Menu, History } from 'lucide-react'
+import { useDailyTasks } from '@/hooks/useDailyTasks'
+import { DailyTaskCard } from '@/components/DailyTaskCard'
 import { supabase } from '@/lib/supabase'
+import { format } from 'date-fns'
 
 export default function Today() {
   const navigate = useNavigate()
   const { user, signOut } = useAuth()
   const { 
     dailyTasks, 
-    isLoading, 
-    error, 
+    isLoading: isDailyLoading, 
+    error: dailyError, 
     completeTask, 
     isCompleting, 
     getTimeRemaining, 
     isTaskExpiringSoon 
   } = useDailyTasks()
+  
+  const { tasks: workerTasks, isLoading: isWorkerLoading } = useWorkerTasks()
   const [profileName, setProfileName] = useState<string>('')
+
+  // Filter worker tasks that are due today
+  const today = format(new Date(), 'yyyy-MM-dd')
+  const todaysWorkerTasks = workerTasks.filter(task => {
+    if (!task.due_date) return false
+    return format(new Date(task.due_date), 'yyyy-MM-dd') === today
+  })
+
+  const isLoading = isDailyLoading || isWorkerLoading
+  const error = dailyError
 
   // Fetch user profile name
   useEffect(() => {
@@ -80,7 +95,7 @@ export default function Today() {
   }
 
   // Calculate task progress - daily tasks don't have completed state, they get moved to history
-  const totalTasks = dailyTasks.length
+  const totalTasks = dailyTasks.length + todaysWorkerTasks.length
   const completionRate = 0 // Daily tasks don't show completion rate as completed ones are removed
 
   // Use profile name if available, otherwise fallback to email username
@@ -145,7 +160,7 @@ export default function Today() {
             Hi, {displayName.charAt(0).toUpperCase() + displayName.slice(1)}
           </h2>
           <p className="text-muted-foreground">
-            {totalTasks} daily task{totalTasks !== 1 ? 's' : ''} assigned
+            {totalTasks} task{totalTasks !== 1 ? 's' : ''} assigned
           </p>
         </div>
       </div>
@@ -173,25 +188,37 @@ export default function Today() {
           </div>
 
           <div className="space-y-3">
-            {dailyTasks.length === 0 ? (
+            {dailyTasks.length === 0 && todaysWorkerTasks.length === 0 ? (
               <div className="text-center py-8">
                 <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-foreground mb-2">No daily tasks assigned</h3>
+                <h3 className="text-lg font-medium text-foreground mb-2">No tasks assigned</h3>
                 <p className="text-muted-foreground">
-                  No daily tasks assigned for today. Check back later or contact your supervisor.
+                  No tasks assigned for today. Check back later or contact your supervisor.
                 </p>
               </div>
             ) : (
-              dailyTasks.map((task) => (
-                <DailyTaskCard 
-                  key={task.id} 
-                  task={task}
-                  onComplete={completeTask}
-                  isCompleting={isCompleting}
-                  getTimeRemaining={getTimeRemaining}
-                  isTaskExpiringSoon={isTaskExpiringSoon}
-                />
-              ))
+              <>
+                {/* Daily Tasks */}
+                {dailyTasks.map((task) => (
+                  <DailyTaskCard 
+                    key={`daily-${task.id}`} 
+                    task={task}
+                    onComplete={completeTask}
+                    isCompleting={isCompleting}
+                    getTimeRemaining={getTimeRemaining}
+                    isTaskExpiringSoon={isTaskExpiringSoon}
+                  />
+                ))}
+                
+                {/* Worker Tasks Due Today */}
+                {todaysWorkerTasks.map((task) => (
+                  <TaskCard 
+                    key={`worker-${task.id}`} 
+                    task={task}
+                    showDueDate={false}
+                  />
+                ))}
+              </>
             )}
           </div>
         </div>
