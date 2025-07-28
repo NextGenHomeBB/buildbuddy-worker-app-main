@@ -25,7 +25,7 @@ export default function TaskListScreen() {
   const listColor = isUnassigned ? '#6B7280' : currentList?.color_hex || '#3478F6'
 
   const handleTaskToggle = (taskId: string, currentStatus: string) => {
-    const newStatus = currentStatus === 'completed' ? 'todo' : 'completed'
+    const newStatus = currentStatus === 'done' ? 'todo' : 'done'
     updateTaskStatus.mutate({ taskId, status: newStatus })
   }
 
@@ -86,14 +86,14 @@ export default function TaskListScreen() {
               <CardContent className="p-4">
                 <div className="flex items-start gap-3">
                   <Checkbox
-                    checked={task.status === 'completed'}
+                    checked={task.status === 'done'}
                     onCheckedChange={() => handleTaskToggle(task.id, task.status)}
                     className="mt-0.5"
                   />
                   <div className="flex-1 min-w-0">
                     <h3
                       className={`font-medium ${
-                        task.status === 'completed'
+                        task.status === 'done'
                           ? 'text-muted-foreground line-through'
                           : 'text-foreground'
                       }`}
@@ -103,7 +103,7 @@ export default function TaskListScreen() {
                     {task.description && (
                       <p
                         className={`text-sm mt-1 ${
-                          task.status === 'completed'
+                          task.status === 'done'
                             ? 'text-muted-foreground line-through'
                             : 'text-muted-foreground'
                         }`}

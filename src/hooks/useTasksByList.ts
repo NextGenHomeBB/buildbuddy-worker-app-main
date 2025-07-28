@@ -6,7 +6,7 @@ export interface Task {
   id: string
   title: string
   description?: string
-  status: 'todo' | 'completed'
+  status: 'todo' | 'done'
   priority: 'low' | 'medium' | 'high'
   list_id?: string
   position: number
@@ -48,9 +48,9 @@ export function useUpdateTaskStatus() {
   const { toast } = useToast()
 
   return useMutation({
-    mutationFn: async ({ taskId, status }: { taskId: string; status: 'todo' | 'completed' }) => {
+    mutationFn: async ({ taskId, status }: { taskId: string; status: 'todo' | 'done' }) => {
       const updates: any = { status }
-      if (status === 'completed') {
+      if (status === 'done') {
         updates.completed_at = new Date().toISOString()
       } else {
         updates.completed_at = null
