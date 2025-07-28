@@ -57,6 +57,7 @@ export const ProjectGeoMap = forwardRef<ProjectGeoMapRef>((_, ref) => {
   const [sheetOpen, setSheetOpen] = useState(false)
   const [mapCenter, setMapCenter] = useState<[number, number]>([4.8936, 52.3728])
   const [mapboxToken, setMapboxToken] = useState('')
+  const [mapLoaded, setMapLoaded] = useState(false)
   
   const { data: projects = [], isLoading } = useProjects()
 
@@ -114,7 +115,7 @@ export const ProjectGeoMap = forwardRef<ProjectGeoMapRef>((_, ref) => {
 
   // Draw geodesic lines between projects
   const drawGeodesicLines = useCallback(() => {
-    if (!map.current || !showLines) return
+    if (!map.current || !showLines || !mapLoaded) return
 
     // Remove existing lines
     linesRef.current.forEach(lineId => {
@@ -168,7 +169,7 @@ export const ProjectGeoMap = forwardRef<ProjectGeoMapRef>((_, ref) => {
 
       linesRef.current.push(lineId)
     }
-  }, [showLines, getProjectsInViewport])
+  }, [showLines, getProjectsInViewport, mapLoaded])
 
   // Initialize map
   useEffect(() => {
@@ -196,8 +197,13 @@ export const ProjectGeoMap = forwardRef<ProjectGeoMapRef>((_, ref) => {
 
     map.current.addControl(new mapboxgl.NavigationControl(), 'top-right')
 
+    // Wait for style to load before enabling operations
+    map.current.on('load', () => {
+      setMapLoaded(true)
+    })
+
     map.current.on('moveend', () => {
-      if (!map.current) return
+      if (!map.current || !mapLoaded) return
       const center = map.current.getCenter()
       const zoom = map.current.getZoom()
       setMapCenter([center.lng, center.lat])
@@ -208,19 +214,20 @@ export const ProjectGeoMap = forwardRef<ProjectGeoMapRef>((_, ref) => {
     return () => {
       map.current?.remove()
       map.current = null
+      setMapLoaded(false)
     }
-  }, [loadViewport, saveViewport, drawGeodesicLines])
+  }, [loadViewport, saveViewport])
 
   // Add project markers
   useEffect(() => {
-    if (!map.current || !projects.length) return
+    if (!map.current || !projects.length || !mapLoaded) return
 
     // Clear existing markers
     markersRef.current.forEach(marker => marker.remove())
     markersRef.current = []
 
     // Fit bounds to all projects on initial load
-    if (markersRef.current.length === 0 && projects.length > 0) {
+    if (projects.length > 0) {
       const bounds = new mapboxgl.LngLatBounds()
       projects.forEach(project => {
         bounds.extend([project.lng, project.lat])
@@ -264,14 +271,16 @@ export const ProjectGeoMap = forwardRef<ProjectGeoMapRef>((_, ref) => {
       markersRef.current.push(marker)
     })
 
-    // Initial line drawing
+    // Initial line drawing after markers are placed
     setTimeout(drawGeodesicLines, 100)
-  }, [projects, drawGeodesicLines])
+  }, [projects, mapLoaded, drawGeodesicLines])
 
   // Redraw lines when toggle changes
   useEffect(() => {
-    drawGeodesicLines()
-  }, [showLines, drawGeodesicLines])
+    if (mapLoaded) {
+      drawGeodesicLines()
+    }
+  }, [showLines, mapLoaded, drawGeodesicLines])
 
   // Imperative handle for flyToProject
   useImperativeHandle(ref, () => ({
