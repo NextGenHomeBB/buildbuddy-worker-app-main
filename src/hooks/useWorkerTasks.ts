@@ -15,6 +15,7 @@ interface WorkerTask {
   created_at: string
   updated_at: string
   due_date?: string  // mapped from end_date
+  start_date?: string  // include start_date for filtering
   end_date?: string
   project_id?: string
 }

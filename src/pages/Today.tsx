@@ -31,11 +31,22 @@ export default function Today() {
   const { tasks: workerTasks, isLoading: isWorkerLoading } = useWorkerTasks()
   const [profileName, setProfileName] = useState<string>('')
 
-  // Filter worker tasks that are due today
+  // Filter worker tasks that are due today or start today
   const today = format(new Date(), 'yyyy-MM-dd')
   const todaysWorkerTasks = workerTasks.filter(task => {
-    if (!task.due_date) return false
-    return format(new Date(task.due_date), 'yyyy-MM-dd') === today
+    // Include tasks that have due_date (end_date) today
+    if (task.due_date) {
+      const taskDueDate = format(new Date(task.due_date), 'yyyy-MM-dd')
+      if (taskDueDate === today) return true
+    }
+    
+    // Include tasks that start today (for tasks without end_date)
+    if (task.start_date && !task.due_date) {
+      const taskStartDate = format(new Date(task.start_date), 'yyyy-MM-dd')
+      if (taskStartDate === today) return true
+    }
+    
+    return false
   })
 
   const isLoading = isDailyLoading || isWorkerLoading
