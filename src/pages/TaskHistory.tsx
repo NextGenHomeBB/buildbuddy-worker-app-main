@@ -1,15 +1,22 @@
 import { useState } from 'react'
-import { Calendar, Search, TrendingUp, Clock, Briefcase } from 'lucide-react'
+import { Calendar, Search, TrendingUp, Clock, Briefcase, LogOut, User, Settings, Menu } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '@/contexts/AuthContext'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { MobileBottomNav } from '@/components/MobileBottomNav'
 import { useTaskHistory } from '@/hooks/useTaskHistory'
 import { format, parseISO } from 'date-fns'
 
 export default function TaskHistory() {
+  const navigate = useNavigate()
+  const { user, signOut } = useAuth()
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedProject, setSelectedProject] = useState<string>()
   
@@ -17,29 +24,135 @@ export default function TaskHistory() {
   const stats = getCompletionStats()
   const filteredHistory = searchHistory(searchTerm)
 
+  const handleSignOut = async () => {
+    await signOut()
+  }
+
   if (isLoading) {
     return (
-      <div className="container mx-auto p-4 space-y-4">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Task History</h1>
+      <div className="min-h-screen bg-background pb-20 lg:pb-0">
+        {/* Header */}
+        <header className="bg-background border-b border-border">
+          <div className="px-4 py-4">
+            <div className="flex items-center justify-between">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="p-2">
+                    <Menu className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-56">
+                  <div className="flex items-center justify-start gap-3 p-3">
+                    <Avatar className="h-8 w-8">
+                      <AvatarFallback>
+                        {user?.email?.charAt(0).toUpperCase() || 'U'}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex flex-col space-y-1 leading-none">
+                      <p className="font-medium text-sm">{user?.email?.split('@')[0] || 'User'}</p>
+                    </div>
+                  </div>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => navigate('/profile')}>
+                    <User className="h-4 w-4 mr-2" />
+                    Profile
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/settings')}>
+                    <Settings className="h-4 w-4 mr-2" />
+                    Settings
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              
+              <img 
+                src="/lovable-uploads/f8eff9bf-a328-4c88-bf0b-a0a5a85c77ec.png" 
+                alt="NextGen Home" 
+                className="h-8 w-auto cursor-pointer hover:opacity-80 transition-opacity"
+                onClick={() => navigate('/today')}
+              />
+              
+              <div className="w-9" />
+            </div>
+          </div>
+        </header>
+
+        <div className="container mx-auto p-4 space-y-4">
+          <div className="text-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+            <p className="text-muted-foreground mt-2">Loading history...</p>
+          </div>
         </div>
-        <div className="text-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p className="text-muted-foreground mt-2">Loading history...</p>
-        </div>
+
+        <MobileBottomNav />
       </div>
     )
   }
 
   return (
-    <div className="container mx-auto p-4 space-y-6">
+    <div className="min-h-screen bg-background pb-20 lg:pb-0">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold flex items-center gap-2">
-          <Calendar className="h-6 w-6" />
-          Task History
-        </h1>
-      </div>
+      <header className="bg-background border-b border-border">
+        <div className="px-4 py-4">
+          <div className="flex items-center justify-between">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="p-2">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-56">
+                <div className="flex items-center justify-start gap-3 p-3">
+                  <Avatar className="h-8 w-8">
+                    <AvatarFallback>
+                      {user?.email?.charAt(0).toUpperCase() || 'U'}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex flex-col space-y-1 leading-none">
+                    <p className="font-medium text-sm">{user?.email?.split('@')[0] || 'User'}</p>
+                  </div>
+                </div>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => navigate('/profile')}>
+                  <User className="h-4 w-4 mr-2" />
+                  Profile
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/settings')}>
+                  <Settings className="h-4 w-4 mr-2" />
+                  Settings
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Sign Out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            
+            <img 
+              src="/lovable-uploads/f8eff9bf-a328-4c88-bf0b-a0a5a85c77ec.png" 
+              alt="NextGen Home" 
+              className="h-8 w-auto cursor-pointer hover:opacity-80 transition-opacity"
+              onClick={() => navigate('/today')}
+            />
+            
+            <div className="w-9" />
+          </div>
+        </div>
+      </header>
+
+      <div className="container mx-auto p-4 space-y-6">
+        {/* Page Header */}
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold flex items-center gap-2">
+            <Calendar className="h-6 w-6" />
+            Task History
+          </h1>
+        </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -174,6 +287,9 @@ export default function TaskHistory() {
           ))
         )}
       </div>
+      </div>
+
+      <MobileBottomNav />
     </div>
   )
 }
