@@ -6,11 +6,12 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Card, CardContent } from '@/components/ui/card'
 import { ArrowLeft, Plus, Trash2, LoaderCircle, Inbox } from 'lucide-react'
 import { AddTaskDialog } from '@/components/AddTaskDialog'
+import { useState } from 'react'
 
 export default function TaskListScreen() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  
+  const [showAddTask, setShowAddTask] = useState(false)
   
   const isUnassigned = id === 'unassigned'
   const listId = isUnassigned ? null : id || null
@@ -31,6 +32,10 @@ export default function TaskListScreen() {
 
   const handleDeleteTask = (taskId: string) => {
     deleteTask.mutate(taskId)
+  }
+
+  const handleDoubleClick = () => {
+    setShowAddTask(true)
   }
 
 
@@ -76,7 +81,7 @@ export default function TaskListScreen() {
       </div>
 
       {/* Tasks List */}
-      <div className="flex-1 p-4 pb-24">
+      <div className="flex-1 p-4 pb-24" onDoubleClick={handleDoubleClick}>
         <div className="space-y-2 max-w-2xl mx-auto">
           {tasks?.filter(task => task.status !== 'done').map((task) => (
             <Card
@@ -147,6 +152,14 @@ export default function TaskListScreen() {
       {/* Floating Add Button */}
       {tasks && tasks.length > 0 && (
         <AddTaskDialog 
+          defaultListId={isUnassigned ? undefined : id}
+        />
+      )}
+
+      {/* Add Task Dialog */}
+      {showAddTask && (
+        <AddTaskDialog 
+          onClose={() => setShowAddTask(false)}
           defaultListId={isUnassigned ? undefined : id}
         />
       )}
