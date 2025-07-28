@@ -34,6 +34,8 @@ export function useDailyTasks() {
   } = useQuery({
     queryKey: ['daily-tasks'],
     queryFn: async () => {
+      console.log('Fetching daily tasks for date:', new Date().toISOString().split('T')[0])
+      
       const { data, error } = await supabase
         .from('daily_task_assignments')
         .select(`
@@ -49,10 +51,16 @@ export function useDailyTasks() {
         `)
         .eq('assigned_date', new Date().toISOString().split('T')[0])
         .eq('status', 'pending')
-        .lt('expires_at', 'now() + interval \'4 hours\'') // Only show tasks that haven't expired
+        .gt('expires_at', new Date().toISOString()) // Only show tasks that haven't expired yet
         .order('created_at', { ascending: false })
 
-      if (error) throw error
+      console.log('Daily tasks query result:', { data, error })
+      
+      if (error) {
+        console.error('Daily tasks query error:', error)
+        throw error
+      }
+      
       return data as DailyTaskAssignment[]
     }
   })
