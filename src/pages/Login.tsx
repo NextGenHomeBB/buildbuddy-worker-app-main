@@ -13,6 +13,9 @@ import { supabase } from '@/lib/supabase'
 export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [name, setName] = useState('')
+  const [companyName, setCompanyName] = useState('')
+  const [phoneNumber, setPhoneNumber] = useState('')
   const [loading, setLoading] = useState(false)
   const [isSignUp, setIsSignUp] = useState(false)
   const { user, signIn } = useAuth()
@@ -95,6 +98,26 @@ export default function Login() {
         </CardHeader>
         <CardContent className="pt-2">
           <form onSubmit={handleSubmit} className="space-y-6">
+            {isSignUp && (
+              <div className="space-y-2">
+                <Label 
+                  htmlFor="name" 
+                  className="text-sm font-medium text-construction-gray-700"
+                >
+                  Name
+                </Label>
+                <Input
+                  id="name"
+                  type="text"
+                  placeholder="John Smith"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                  className="h-12 text-base border-2 border-construction-gray-200 focus:border-construction-yellow focus:ring-construction-yellow/20 rounded-lg"
+                />
+              </div>
+            )}
+
             <div className="space-y-2">
               <Label 
                 htmlFor="email" 
@@ -129,6 +152,46 @@ export default function Login() {
                 className="h-12 text-base border-2 border-construction-gray-200 focus:border-construction-yellow focus:ring-construction-yellow/20 rounded-lg"
               />
             </div>
+
+            {isSignUp && (
+              <>
+                <div className="space-y-2">
+                  <Label 
+                    htmlFor="companyName" 
+                    className="text-sm font-medium text-construction-gray-700"
+                  >
+                    Company Name
+                  </Label>
+                  <Input
+                    id="companyName"
+                    type="text"
+                    placeholder="ABC Construction Co."
+                    value={companyName}
+                    onChange={(e) => setCompanyName(e.target.value)}
+                    required
+                    className="h-12 text-base border-2 border-construction-gray-200 focus:border-construction-yellow focus:ring-construction-yellow/20 rounded-lg"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label 
+                    htmlFor="phoneNumber" 
+                    className="text-sm font-medium text-construction-gray-700"
+                  >
+                    Phone Number
+                  </Label>
+                  <Input
+                    id="phoneNumber"
+                    type="tel"
+                    placeholder="+1 (555) 123-4567"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    required
+                    className="h-12 text-base border-2 border-construction-gray-200 focus:border-construction-yellow focus:ring-construction-yellow/20 rounded-lg"
+                  />
+                </div>
+              </>
+            )}
 
             <Button 
               type="submit" 
