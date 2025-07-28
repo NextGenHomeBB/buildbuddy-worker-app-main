@@ -88,6 +88,64 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_task_assignments: {
+        Row: {
+          assigned_date: string
+          completed_at: string | null
+          created_at: string | null
+          expires_at: string | null
+          id: string
+          project_id: string | null
+          status: string | null
+          task_template_id: string | null
+          worker_id: string
+        }
+        Insert: {
+          assigned_date: string
+          completed_at?: string | null
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          project_id?: string | null
+          status?: string | null
+          task_template_id?: string | null
+          worker_id: string
+        }
+        Update: {
+          assigned_date?: string
+          completed_at?: string | null
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          project_id?: string | null
+          status?: string | null
+          task_template_id?: string | null
+          worker_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_task_assignments_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "daily_task_assignments_task_template_id_fkey"
+            columns: ["task_template_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "daily_task_assignments_task_template_id_fkey"
+            columns: ["task_template_id"]
+            isOneToOne: false
+            referencedRelation: "worker.my_tasks_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       materials: {
         Row: {
           category: string | null
@@ -382,6 +440,57 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      task_completion_history: {
+        Row: {
+          completed_at: string
+          completion_date: string
+          created_at: string | null
+          daily_assignment_id: string | null
+          id: string
+          project_id: string | null
+          task_description: string | null
+          task_title: string
+          worker_id: string
+        }
+        Insert: {
+          completed_at: string
+          completion_date: string
+          created_at?: string | null
+          daily_assignment_id?: string | null
+          id?: string
+          project_id?: string | null
+          task_description?: string | null
+          task_title: string
+          worker_id: string
+        }
+        Update: {
+          completed_at?: string
+          completion_date?: string
+          created_at?: string | null
+          daily_assignment_id?: string | null
+          id?: string
+          project_id?: string | null
+          task_description?: string | null
+          task_title?: string
+          worker_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_completion_history_daily_assignment_id_fkey"
+            columns: ["daily_assignment_id"]
+            isOneToOne: false
+            referencedRelation: "daily_task_assignments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "task_completion_history_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       task_lists: {
         Row: {
@@ -707,9 +816,17 @@ export type Database = {
         }
         Returns: boolean
       }
+      complete_daily_task: {
+        Args: { assignment_id: string }
+        Returns: Json
+      }
       create_user_profile: {
         Args: { user_id: string; user_email?: string }
         Returns: Json
+      }
+      expire_old_daily_tasks: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
       get_current_user_role: {
         Args: Record<PropertyKey, never>

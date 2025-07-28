@@ -17,10 +17,39 @@ export interface WorkerTask {
   due_date?: string
 }
 
+export interface DailyTaskAssignment {
+  id: string
+  task_template_id: string
+  worker_id: string
+  project_id?: string
+  assigned_date: string
+  expires_at: string
+  status: 'pending' | 'completed' | 'expired'
+  completed_at?: string
+  created_at: string
+}
+
+export interface TaskHistoryItem {
+  id: string
+  daily_assignment_id: string
+  worker_id: string
+  project_id?: string
+  task_title: string
+  task_description?: string
+  completion_date: string
+  completed_at: string
+  created_at: string
+}
+
 export interface Database {
   public: {
     Tables: {
-      // Define your actual table structure here
+      daily_task_assignments: {
+        Row: DailyTaskAssignment
+      }
+      task_completion_history: {
+        Row: TaskHistoryItem
+      }
     }
     Views: {
       'worker.my_tasks_view': {

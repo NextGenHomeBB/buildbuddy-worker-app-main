@@ -15,15 +15,15 @@ describe('Task Toggle', () => {
     // Intercept task update API calls
     cy.intercept('PATCH', '/rest/v1/tasks*').as('updateTask')
     
-    // Wait for tasks to load
-    cy.get('[data-testid="task-card"]').should('exist')
+    // Wait for daily tasks to load
+    cy.get('[data-testid="daily-task-card"]').should('exist')
     
     // Click first task checkbox (online)
-    cy.get('[data-testid="task-card"]').first().find('input[type="checkbox"]').click()
+    cy.get('[data-testid="daily-task-card"]').first().find('input[type="checkbox"]').click()
     
     // Wait for API call and check success toast
     cy.wait('@updateTask')
-    cy.contains('Marked done').should('be.visible')
+    cy.contains('Task Completed').should('be.visible')
     
     // Force offline mode
     cy.window().then((win) => {
@@ -34,7 +34,7 @@ describe('Task Toggle', () => {
     })
     
     // Click checkbox again (offline)
-    cy.get('[data-testid="task-card"]').first().find('input[type="checkbox"]').click()
+    cy.get('[data-testid="daily-task-card"]').first().find('input[type="checkbox"]').click()
     
     // Should show queued toast
     cy.contains('Queued while offline').should('be.visible')
