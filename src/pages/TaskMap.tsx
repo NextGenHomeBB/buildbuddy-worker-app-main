@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { TaskMapCanvas } from '@/components/TaskMapCanvas'
+import { ProjectGeoMap } from '@/components/ProjectGeoMap'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, Map } from 'lucide-react'
 import { useIsMobile } from '@/hooks/use-mobile'
@@ -33,27 +33,25 @@ export default function TaskMap() {
             {!isMobile && (
               <>
                 <Map className="h-5 w-5 text-muted-foreground" />
-                <h1 className="text-xl font-semibold text-foreground">Task Map</h1>
+                <h1 className="text-xl font-semibold text-foreground">Project Map</h1>
               </>
             )}
           </div>
         </div>
 
         <div className="text-sm text-muted-foreground">
-          Drag tasks to create relationships
+          Click projects to view details • Toggle lines to see connections
         </div>
       </div>
 
-      {/* Canvas */}
-      <div className="flex-1 relative">
-        <TaskMapCanvas />
-      </div>
+      {/* Map */}
+      <ProjectGeoMap />
 
       {/* Mobile Instructions */}
       {isMobile && (
         <div className="bg-card border-t border-border p-3">
           <div className="text-xs text-muted-foreground text-center">
-            Drag a task onto another to create a relationship • Pinch to zoom • Pan to navigate
+            Tap projects for details • Use controls to navigate
           </div>
         </div>
       )}
