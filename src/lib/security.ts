@@ -46,6 +46,25 @@ export const projectAssignmentSchema = z.object({
   description: z.string().max(2000).optional()
 })
 
+// Enhanced profile validation with work role security
+export const enhancedProfileValidationSchema = z.object({
+  full_name: z.string()
+    .min(1, 'Name is required')
+    .max(100, 'Name must be less than 100 characters')
+    .refine(val => sanitizeText(val).length > 0, 'Name cannot be empty after sanitization'),
+  work_role: z.array(z.string().max(50)).max(5, 'Too many work roles').optional(),
+  avatar_url: z.string().url().optional().or(z.literal(''))
+})
+
+// Task list validation
+export const taskListValidationSchema = z.object({
+  name: z.string()
+    .min(1, 'List name is required')
+    .max(100, 'List name must be less than 100 characters')
+    .refine(val => sanitizeText(val).length > 0, 'List name cannot be empty after sanitization'),
+  color_hex: z.string().regex(/^#[0-9A-F]{6}$/i, 'Invalid color format')
+})
+
 // Rate limiting for sensitive operations
 export class RateLimiter {
   private attempts: Map<string, number[]> = new Map()
@@ -87,22 +106,76 @@ export class RateLimiter {
 // Global rate limiter instances
 export const authRateLimiter = new RateLimiter(5, 15 * 60 * 1000) // 5 attempts per 15 minutes
 export const taskCreationLimiter = new RateLimiter(10, 5 * 60 * 1000) // 10 tasks per 5 minutes
+export const taskUpdateLimiter = new RateLimiter(20, 5 * 60 * 1000) // 20 task updates per 5 minutes
+export const profileUpdateLimiter = new RateLimiter(5, 10 * 60 * 1000) // 5 profile updates per 10 minutes
+export const taskListLimiter = new RateLimiter(5, 5 * 60 * 1000) // 5 list operations per 5 minutes
 export const roleChangeLimiter = new RateLimiter(3, 60 * 60 * 1000) // 3 role changes per hour
 
-// Security utility functions
-export const validateOperation = (operation: string, userId: string): boolean => {
+// Enhanced security utility functions with database rate limiting integration
+export const validateOperation = async (operation: string, userId: string): Promise<boolean> => {
   const key = `${operation}:${userId}`
   
-  switch (operation) {
-    case 'auth':
-      return authRateLimiter.isAllowed(key)
-    case 'task_creation':
-      return taskCreationLimiter.isAllowed(key)
-    case 'role_change':
-      return roleChangeLimiter.isAllowed(key)
-    default:
-      return true
+  // Client-side rate limiting first (immediate feedback)
+  const clientAllowed = (() => {
+    switch (operation) {
+      case 'auth':
+        return authRateLimiter.isAllowed(key)
+      case 'task_creation':
+        return taskCreationLimiter.isAllowed(key)
+      case 'task_update':
+        return taskUpdateLimiter.isAllowed(key)
+      case 'profile_update':
+        return profileUpdateLimiter.isAllowed(key)
+      case 'task_list_operation':
+        return taskListLimiter.isAllowed(key)
+      case 'role_change':
+        return roleChangeLimiter.isAllowed(key)
+      default:
+        return true
+    }
+  })()
+  
+  if (!clientAllowed) {
+    logSecurityEvent({
+      action: `Rate limit exceeded for ${operation}`,
+      userId,
+      severity: 'medium',
+      details: { operation, timestamp: new Date().toISOString() }
+    })
+    return false
   }
+  
+  // For critical operations, also check database rate limiting
+  if (['role_change', 'profile_update'].includes(operation)) {
+    try {
+      const { supabase } = await import('@/lib/supabase')
+      const { data } = await supabase.rpc('check_rate_limit', {
+        operation_name: operation,
+        max_attempts: operation === 'role_change' ? 3 : 5,
+        window_minutes: operation === 'role_change' ? 60 : 10
+      })
+      
+      if (!data) {
+        logSecurityEvent({
+          action: `Database rate limit exceeded for ${operation}`,
+          userId,
+          severity: 'high',
+          details: { operation, timestamp: new Date().toISOString() }
+        })
+        return false
+      }
+    } catch (error) {
+      logSecurityEvent({
+        action: `Rate limit check failed for ${operation}`,
+        userId,
+        severity: 'medium',
+        details: { operation, error: error instanceof Error ? error.message : 'Unknown error' }
+      })
+      // Allow operation to proceed if rate limit check fails to avoid blocking users
+    }
+  }
+  
+  return true
 }
 
 // Enhanced logging for security events

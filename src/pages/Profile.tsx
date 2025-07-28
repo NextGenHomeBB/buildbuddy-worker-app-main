@@ -104,17 +104,33 @@ export default function Profile() {
   const handleSaveProfile = async () => {
     if (!user) return;
 
+    // Check rate limiting before proceeding
+    const { validateOperation } = await import('@/lib/security')
+    const isAllowed = await validateOperation('profile_update', user.id)
+    
+    if (!isAllowed) {
+      toast({
+        title: 'Rate limit exceeded',
+        description: 'Please wait before updating your profile again',
+        variant: 'destructive',
+      })
+      return
+    }
+
     // Combine all selected roles
     const allRoles = [...selectedRoles, ...customRoles];
     
-    // Validate and sanitize input
-    const validation = profileValidationSchema.safeParse({
-      full_name: fullName.trim()
+    // Enhanced validation with work role limits
+    const { enhancedProfileValidationSchema } = await import('@/lib/security')
+    const validation = enhancedProfileValidationSchema.safeParse({
+      full_name: fullName.trim(),
+      work_role: allRoles
     });
+    
     if (!validation.success) {
       toast({
         title: "Validation Error",
-        description: validation.error.errors[0]?.message || "Invalid name",
+        description: validation.error.errors[0]?.message || "Invalid input",
         variant: "destructive"
       });
       return;

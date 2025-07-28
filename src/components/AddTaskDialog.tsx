@@ -114,6 +114,19 @@ export function AddTaskDialog({ trigger, onClose, defaultListId }: AddTaskDialog
       return
     }
 
+    // Check rate limiting before proceeding
+    const { validateOperation } = await import('@/lib/security')
+    const isAllowed = await validateOperation('task_creation', user.id)
+    
+    if (!isAllowed) {
+      toast({
+        title: 'Rate limit exceeded',
+        description: 'Please wait before creating more tasks',
+        variant: 'destructive',
+      })
+      return
+    }
+
     // Validate and sanitize input
     const validation = taskValidationSchema.safeParse({
       title: title.trim(),
