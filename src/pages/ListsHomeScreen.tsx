@@ -2,6 +2,7 @@ import { useTaskLists } from '@/hooks/useTaskLists'
 import { useTasksByList } from '@/hooks/useTasksByList'
 import { ListCard } from '@/components/ListCard'
 import { NewListModal } from '@/components/NewListModal'
+import { MobileBottomNav } from '@/components/MobileBottomNav'
 import { Card, CardContent } from '@/components/ui/card'
 import { NavLink } from 'react-router-dom'
 import { Inbox, LoaderCircle } from 'lucide-react'
@@ -82,6 +83,8 @@ export default function ListsHomeScreen() {
           )}
         </div>
       </div>
+      
+      <MobileBottomNav />
     </div>
   )
 }
