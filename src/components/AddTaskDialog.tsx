@@ -18,11 +18,12 @@ interface AddTaskDialogProps {
   trigger?: React.ReactNode
   onClose?: () => void
   defaultListId?: string
+  open?: boolean
 }
 
-export function AddTaskDialog({ trigger, onClose, defaultListId }: AddTaskDialogProps) {
+export function AddTaskDialog({ trigger, onClose, defaultListId, open: externalOpen }: AddTaskDialogProps) {
   const { t } = useTranslation()
-  const [open, setOpen] = useState(false)
+  const [internalOpen, setInternalOpen] = useState(false)
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [priority, setPriority] = useState<'low' | 'medium' | 'high'>('medium')
@@ -30,6 +31,14 @@ export function AddTaskDialog({ trigger, onClose, defaultListId }: AddTaskDialog
   const { toast } = useToast()
   const { user } = useAuth()
   const queryClient = useQueryClient()
+
+  // Use external open state if provided, otherwise use internal state
+  const open = externalOpen !== undefined ? externalOpen : internalOpen
+  const setOpen = externalOpen !== undefined ? 
+    (value: boolean) => {
+      if (!value) onClose?.()
+    } : 
+    setInternalOpen
 
   const createTaskMutation = useMutation({
     mutationFn: async (taskData: { title: string; description?: string; priority: string }) => {

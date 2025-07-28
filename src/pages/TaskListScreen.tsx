@@ -157,12 +157,11 @@ export default function TaskListScreen() {
       )}
 
       {/* Add Task Dialog */}
-      {showAddTask && (
-        <AddTaskDialog 
-          onClose={() => setShowAddTask(false)}
-          defaultListId={isUnassigned ? undefined : id}
-        />
-      )}
+      <AddTaskDialog 
+        open={showAddTask}
+        onClose={() => setShowAddTask(false)}
+        defaultListId={isUnassigned ? undefined : id}
+      />
     </div>
   )
 }
