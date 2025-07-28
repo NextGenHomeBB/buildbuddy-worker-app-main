@@ -78,7 +78,7 @@ export default function TaskListScreen() {
       {/* Tasks List */}
       <div className="flex-1 p-4 pb-24">
         <div className="space-y-2 max-w-2xl mx-auto">
-          {tasks?.map((task) => (
+          {tasks?.filter(task => task.status !== 'done').map((task) => (
             <Card
               key={task.id}
               className="transition-all hover:shadow-sm"
@@ -125,7 +125,7 @@ export default function TaskListScreen() {
             </Card>
           ))}
 
-          {tasks?.length === 0 && (
+          {tasks?.filter(task => task.status !== 'done').length === 0 && (
             <div className="text-center py-12">
               <p className="text-muted-foreground mb-4">
                 No tasks in this list yet.
