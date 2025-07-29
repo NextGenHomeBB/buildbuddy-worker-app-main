@@ -33,7 +33,7 @@ export default function Today() {
 
   // Filter worker tasks - show tasks due today, starting today, or tasks without dates (newly assigned)
   const today = format(new Date(), 'yyyy-MM-dd')
-  const todaysWorkerTasks = workerTasks.filter(task => {
+  const filteredWorkerTasks = workerTasks.filter(task => {
     // Include tasks that have due_date (end_date) today
     if (task.due_date) {
       const taskDueDate = format(new Date(task.due_date), 'yyyy-MM-dd')
@@ -52,6 +52,23 @@ export default function Today() {
     }
     
     return false
+  })
+
+  // Sort function for priority (high first, then medium, then low)
+  const priorityOrder = { 'high': 0, 'medium': 1, 'low': 2 }
+  
+  // Sort daily tasks by priority
+  const sortedDailyTasks = [...dailyTasks].sort((a, b) => {
+    const priorityA = priorityOrder[a.task_template?.priority as keyof typeof priorityOrder] ?? 1
+    const priorityB = priorityOrder[b.task_template?.priority as keyof typeof priorityOrder] ?? 1
+    return priorityA - priorityB
+  })
+  
+  // Sort worker tasks by priority
+  const todaysWorkerTasks = [...filteredWorkerTasks].sort((a, b) => {
+    const priorityA = priorityOrder[a.priority as keyof typeof priorityOrder] ?? 1
+    const priorityB = priorityOrder[b.priority as keyof typeof priorityOrder] ?? 1
+    return priorityA - priorityB
   })
 
   const isLoading = isDailyLoading || isWorkerLoading
@@ -111,7 +128,7 @@ export default function Today() {
   }
 
   // Calculate task progress - daily tasks don't have completed state, they get moved to history
-  const totalTasks = dailyTasks.length + todaysWorkerTasks.length
+  const totalTasks = sortedDailyTasks.length + todaysWorkerTasks.length
   const completionRate = 0 // Daily tasks don't show completion rate as completed ones are removed
 
   // Use profile name if available, otherwise fallback to email username
@@ -204,7 +221,7 @@ export default function Today() {
           </div>
 
           <div className="space-y-3">
-            {dailyTasks.length === 0 && todaysWorkerTasks.length === 0 ? (
+            {sortedDailyTasks.length === 0 && todaysWorkerTasks.length === 0 ? (
               <div className="text-center py-8">
                 <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-foreground mb-2">No tasks assigned</h3>
@@ -215,7 +232,7 @@ export default function Today() {
             ) : (
               <>
                 {/* Daily Tasks */}
-                {dailyTasks.map((task) => (
+                {sortedDailyTasks.map((task) => (
                   <DailyTaskCard 
                     key={`daily-${task.id}`} 
                     task={task}
