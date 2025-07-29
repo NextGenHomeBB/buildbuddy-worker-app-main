@@ -25,6 +25,22 @@ export function ShiftTracker() {
   const [elapsedTime, setElapsedTime] = useState(0)
   const [todayHours, setTodayHours] = useState(0)
 
+  // Load shift state from localStorage on mount
+  useEffect(() => {
+    const savedShiftData = localStorage.getItem('activeShift')
+    if (savedShiftData) {
+      const { startTime } = JSON.parse(savedShiftData)
+      const shiftStart = new Date(startTime)
+      setShiftStartTime(shiftStart)
+      setIsShiftActive(true)
+      
+      // Calculate elapsed time
+      const now = new Date()
+      const elapsed = Math.floor((now.getTime() - shiftStart.getTime()) / 1000)
+      setElapsedTime(elapsed)
+    }
+  }, [])
+
   // Update elapsed time every second when shift is active
   useEffect(() => {
     let interval: NodeJS.Timeout
@@ -75,6 +91,11 @@ export function ShiftTracker() {
     setIsShiftActive(true)
     setElapsedTime(0)
     
+    // Save to localStorage
+    localStorage.setItem('activeShift', JSON.stringify({
+      startTime: now.toISOString()
+    }))
+    
     toast({
       title: 'Shift Started',
       description: `Started at ${now.toLocaleTimeString()}`,
@@ -103,6 +124,9 @@ export function ShiftTracker() {
       setIsShiftActive(false)
       setShiftStartTime(null)
       setElapsedTime(0)
+      
+      // Clear localStorage
+      localStorage.removeItem('activeShift')
       
       // Reload today's hours
       await loadTodayHours()
