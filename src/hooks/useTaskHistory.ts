@@ -31,33 +31,81 @@ export function useTaskHistory(startDate?: Date, endDate?: Date, projectId?: str
   } = useQuery({
     queryKey: ['task-history', startDate, endDate, projectId],
     queryFn: async () => {
-      let query = supabase
-        .from('task_completion_history')
-        .select(`
-          *,
-          project:projects (
-            name
-          )
-        `)
-        .order('completed_at', { ascending: false })
+      // Fetch both daily task completion history and completed worker tasks
+      const [dailyTasksResponse, workerTasksResponse] = await Promise.all([
+        // Daily task completion history
+        supabase
+          .from('task_completion_history')
+          .select(`
+            *,
+            project:projects (
+              name
+            )
+          `)
+          .order('completed_at', { ascending: false }),
+        
+        // Completed worker tasks
+        supabase
+          .from('tasks')
+          .select(`
+            id,
+            title,
+            description,
+            completed_at,
+            project_id,
+            assignee,
+            project:projects (
+              name
+            )
+          `)
+          .eq('status', 'done')
+          .not('completed_at', 'is', null)
+          .order('completed_at', { ascending: false })
+      ])
 
-      // Apply date filter
+      if (dailyTasksResponse.error) throw dailyTasksResponse.error
+      if (workerTasksResponse.error) throw workerTasksResponse.error
+
+      // Transform worker tasks to match history format
+      const transformedWorkerTasks = (workerTasksResponse.data || []).map(task => ({
+        id: task.id,
+        daily_assignment_id: '', // Not applicable for worker tasks
+        worker_id: task.assignee || '',
+        project_id: task.project_id,
+        task_title: task.title,
+        task_description: task.description,
+        completion_date: task.completed_at ? task.completed_at.split('T')[0] : '',
+        completed_at: task.completed_at || '',
+        created_at: task.completed_at || '',
+        project: task.project
+      }))
+
+      // Combine and sort all history items
+      const allHistory = [
+        ...(dailyTasksResponse.data || []),
+        ...transformedWorkerTasks
+      ].sort((a, b) => new Date(b.completed_at).getTime() - new Date(a.completed_at).getTime())
+
+      // Apply filters if provided
+      let filteredHistory = allHistory
+
       if (startDate) {
-        query = query.gte('completion_date', format(startDate, 'yyyy-MM-dd'))
+        filteredHistory = filteredHistory.filter(item => 
+          item.completion_date >= format(startDate, 'yyyy-MM-dd')
+        )
       }
       if (endDate) {
-        query = query.lte('completion_date', format(endDate, 'yyyy-MM-dd'))
+        filteredHistory = filteredHistory.filter(item => 
+          item.completion_date <= format(endDate, 'yyyy-MM-dd')
+        )
       }
-
-      // Apply project filter
       if (projectId) {
-        query = query.eq('project_id', projectId)
+        filteredHistory = filteredHistory.filter(item => 
+          item.project_id === projectId
+        )
       }
 
-      const { data, error } = await query
-
-      if (error) throw error
-      return data as TaskHistoryItem[]
+      return filteredHistory as TaskHistoryItem[]
     }
   })
 
