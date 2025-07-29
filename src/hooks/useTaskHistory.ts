@@ -1,6 +1,8 @@
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { format, parseISO, startOfDay, endOfDay } from 'date-fns'
+import { useAuth } from '@/contexts/AuthContext'
+import { flushMutationQueue } from '@/lib/offlineQueue'
 
 export interface TaskHistoryItem {
   id: string
@@ -24,12 +26,17 @@ export interface GroupedTaskHistory {
 }
 
 export function useTaskHistory(startDate?: Date, endDate?: Date, projectId?: string) {
+  const { user } = useAuth()
+  const queryClient = useQueryClient()
+  
   const {
     data: history,
     isLoading,
-    error
+    error,
+    refetch
   } = useQuery({
-    queryKey: ['task-history', startDate, endDate, projectId],
+    queryKey: ['task-history', user?.id, startDate, endDate, projectId],
+    enabled: !!user,
     queryFn: async () => {
       // Fetch both daily task completion history and completed worker tasks
       const [dailyTasksResponse, workerTasksResponse] = await Promise.all([
@@ -42,6 +49,7 @@ export function useTaskHistory(startDate?: Date, endDate?: Date, projectId?: str
               name
             )
           `)
+          .eq('worker_id', user!.id)
           .order('completed_at', { ascending: false }),
         
         // Completed worker tasks
@@ -59,6 +67,7 @@ export function useTaskHistory(startDate?: Date, endDate?: Date, projectId?: str
             )
           `)
           .eq('status', 'done')
+          .eq('assignee', user!.id)
           .not('completed_at', 'is', null)
           .order('completed_at', { ascending: false })
       ])
@@ -108,6 +117,26 @@ export function useTaskHistory(startDate?: Date, endDate?: Date, projectId?: str
       return filteredHistory as TaskHistoryItem[]
     }
   })
+
+  // Function to flush offline queue and refresh history
+  const flushAndRefresh = async () => {
+    try {
+      console.log('Flushing offline queue...')
+      const result = await flushMutationQueue()
+      console.log('Queue flush result:', result)
+      
+      if (result.success > 0) {
+        // Invalidate and refetch task history when offline tasks are synced
+        await queryClient.invalidateQueries({ queryKey: ['task-history'] })
+        console.log('Task history refreshed after queue flush')
+      }
+      
+      return result
+    } catch (error) {
+      console.error('Failed to flush offline queue:', error)
+      return { success: 0, failed: 0 }
+    }
+  }
 
   // Group tasks by completion date
   const groupedHistory: GroupedTaskHistory[] = history?.reduce((groups, task) => {
@@ -178,6 +207,8 @@ export function useTaskHistory(startDate?: Date, endDate?: Date, projectId?: str
     isLoading,
     error,
     searchHistory,
-    getCompletionStats
+    getCompletionStats,
+    flushAndRefresh,
+    refetch
   }
 }

@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Calendar, Search, TrendingUp, Clock, Briefcase, LogOut, User, Settings, Menu } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Calendar, Search, TrendingUp, Clock, Briefcase, LogOut, User, Settings, Menu, RefreshCw } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -20,13 +20,44 @@ export default function TaskHistory() {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedProject, setSelectedProject] = useState<string>()
   
-  const { groupedHistory, isLoading, getCompletionStats, searchHistory } = useTaskHistory()
+  const { 
+    groupedHistory, 
+    isLoading, 
+    getCompletionStats, 
+    searchHistory, 
+    flushAndRefresh,
+    error 
+  } = useTaskHistory()
   const stats = getCompletionStats()
   const filteredHistory = searchHistory(searchTerm)
+  const [isRefreshing, setIsRefreshing] = useState(false)
 
   const handleSignOut = async () => {
     await signOut()
   }
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true)
+    try {
+      await flushAndRefresh()
+    } catch (error) {
+      console.error('Failed to refresh:', error)
+    } finally {
+      setIsRefreshing(false)
+    }
+  }
+
+  // Auto-flush queue when component mounts to sync any pending tasks
+  useEffect(() => {
+    const autoFlush = async () => {
+      try {
+        await flushAndRefresh()
+      } catch (error) {
+        console.error('Auto-flush failed:', error)
+      }
+    }
+    autoFlush()
+  }, [])
 
   if (isLoading) {
     return (
@@ -152,6 +183,16 @@ export default function TaskHistory() {
             <Calendar className="h-6 w-6" />
             Task History
           </h1>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+            className="flex items-center gap-2"
+          >
+            <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            Sync
+          </Button>
         </div>
 
       {/* Stats Cards */}
@@ -216,14 +257,36 @@ export default function TaskHistory() {
 
       {/* History List */}
       <div className="space-y-4">
+        {error && (
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 text-destructive">
+                <span>⚠️</span>
+                <p className="text-sm">Failed to load history. Please try refreshing.</p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+        
         {filteredHistory.length === 0 ? (
           <Card>
             <CardContent className="p-8 text-center">
               <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-lg font-medium mb-2">No task history found</h3>
-              <p className="text-muted-foreground">
-                {searchTerm ? 'Try adjusting your search terms.' : 'Complete some daily tasks to see your history here.'}
+              <p className="text-muted-foreground mb-4">
+                {searchTerm ? 'Try adjusting your search terms.' : 'Complete some tasks to see your history here.'}
               </p>
+              {!searchTerm && (
+                <Button 
+                  variant="outline" 
+                  onClick={handleRefresh}
+                  disabled={isRefreshing}
+                  className="flex items-center gap-2 mx-auto"
+                >
+                  <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                  Sync Completed Tasks
+                </Button>
+              )}
             </CardContent>
           </Card>
         ) : (
