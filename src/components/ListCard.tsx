@@ -1,7 +1,9 @@
 import { Card, CardContent } from '@/components/ui/card'
-import { TaskList } from '@/hooks/useTaskLists'
+import { Button } from '@/components/ui/button'
+import { TaskList, useDeleteTaskList } from '@/hooks/useTaskLists'
 import { useTasksByList } from '@/hooks/useTasksByList'
 import { NavLink } from 'react-router-dom'
+import { Trash2 } from 'lucide-react'
 
 interface ListCardProps {
   list: TaskList
@@ -9,10 +11,20 @@ interface ListCardProps {
 
 export function ListCard({ list }: ListCardProps) {
   const { data: tasks } = useTasksByList(list.id)
+  const deleteTaskList = useDeleteTaskList()
   const todoCount = tasks?.filter(task => task.status === 'todo').length || 0
 
+  const handleDelete = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    
+    if (window.confirm(`Are you sure you want to delete "${list.name}"? This action cannot be undone.`)) {
+      deleteTaskList.mutate(list.id)
+    }
+  }
+
   return (
-    <NavLink to={`/lists/${list.id}`} className="block">
+    <NavLink to={`/lists/${list.id}`} className="block group">
       <Card className="hover:shadow-md transition-shadow">
         <CardContent className="p-4">
           <div className="flex items-center gap-3">
@@ -28,6 +40,15 @@ export function ListCard({ list }: ListCardProps) {
                 {todoCount} tasks
               </p>
             </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleDelete}
+              disabled={deleteTaskList.isPending}
+              className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
           </div>
         </CardContent>
       </Card>
