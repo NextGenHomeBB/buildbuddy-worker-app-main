@@ -173,6 +173,45 @@ export type Database = {
           },
         ]
       }
+      invite_codes: {
+        Row: {
+          code: string
+          created_at: string
+          created_by: string
+          current_uses: number | null
+          expires_at: string | null
+          id: string
+          is_active: boolean | null
+          max_uses: number | null
+          organization_id: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          created_by: string
+          current_uses?: number | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          max_uses?: number | null
+          organization_id: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          created_by?: string
+          current_uses?: number | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          max_uses?: number | null
+          organization_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       labour_entries: {
         Row: {
           created_at: string
@@ -829,6 +868,125 @@ export type Database = {
         }
         Relationships: []
       }
+      schedule_item_workers: {
+        Row: {
+          created_at: string
+          id: string
+          is_assistant: boolean
+          organization_id: string
+          schedule_item_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_assistant?: boolean
+          organization_id?: string
+          schedule_item_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_assistant?: boolean
+          organization_id?: string
+          schedule_item_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "schedule_item_workers_schedule_item_id_fkey"
+            columns: ["schedule_item_id"]
+            isOneToOne: false
+            referencedRelation: "schedule_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      schedule_items: {
+        Row: {
+          address: string
+          category: string
+          created_at: string
+          end_time: string
+          id: string
+          organization_id: string
+          project_id: string | null
+          schedule_id: string
+          start_time: string
+          updated_at: string
+        }
+        Insert: {
+          address: string
+          category?: string
+          created_at?: string
+          end_time: string
+          id?: string
+          organization_id?: string
+          project_id?: string | null
+          schedule_id: string
+          start_time: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          category?: string
+          created_at?: string
+          end_time?: string
+          id?: string
+          organization_id?: string
+          project_id?: string | null
+          schedule_id?: string
+          start_time?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "schedule_items_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "schedule_items_schedule_id_fkey"
+            columns: ["schedule_id"]
+            isOneToOne: false
+            referencedRelation: "schedules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      schedules: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          organization_id: string
+          updated_at: string
+          work_date: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          organization_id?: string
+          updated_at?: string
+          work_date: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          organization_id?: string
+          updated_at?: string
+          work_date?: string
+        }
+        Relationships: []
+      }
       task_comments: {
         Row: {
           content: string
@@ -1192,6 +1350,14 @@ export type Database = {
         Returns: undefined
       }
       current_org: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      generate_invite_code: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      get_current_user_role: {
         Args: Record<PropertyKey, never>
         Returns: string
       }

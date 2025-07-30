@@ -46,18 +46,26 @@ export function AddTaskDialog({ trigger, onClose, defaultListId, open: externalO
     mutationFn: async (taskData: { title: string; description?: string; priority: string }) => {
       console.log('Creating task with data:', taskData)
       console.log('Current user:', user?.id)
+      console.log('Current org:', currentOrgId)
       
-      // First, let's get a project for this user
-      const { data: userProjectRole, error: projectError } = await supabase
-        .from('user_project_role')
-        .select('project_id')
-        .eq('user_id', user?.id)
+      if (!currentOrgId) {
+        throw new Error('No organization selected')
+      }
+
+      // First, get a project for this organization
+      const { data: projects, error: projectError } = await supabase
+        .from('projects')
+        .select('id')
+        .eq('organization_id', currentOrgId)
         .limit(1)
-        .single()
 
       if (projectError) {
         console.error('Project lookup error:', projectError)
-        // If no project found, create task without project initially
+        throw new Error('Failed to find organization projects')
+      }
+
+      if (!projects || projects.length === 0) {
+        throw new Error('No projects found in organization. Please create a project first.')
       }
 
       const taskToInsert = {
@@ -66,9 +74,9 @@ export function AddTaskDialog({ trigger, onClose, defaultListId, open: externalO
         priority: taskData.priority,
         assigned_to: user?.id || null,
         status: 'pending',
-        project_id: userProjectRole?.project_id || null,
+        project_id: projects[0].id, // Use the first available project
         phase_id: null,
-        organization_id: currentOrgId || '',
+        organization_id: currentOrgId,
       }
 
       console.log('Inserting task:', taskToInsert)
@@ -89,6 +97,7 @@ export function AddTaskDialog({ trigger, onClose, defaultListId, open: externalO
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['my-tasks'] })
       queryClient.invalidateQueries({ queryKey: ['tasks'] })
+      queryClient.invalidateQueries({ queryKey: ['today-tasks'] })
       queryClient.invalidateQueries({ queryKey: ['taskLists'] })
       toast({
         title: t('today.taskCompleted'),
