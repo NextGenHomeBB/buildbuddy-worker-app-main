@@ -104,9 +104,9 @@ export default function Today() {
         .eq('organization_id', currentOrgId)
         .in('status', ['pending', 'in_progress'])
       
-      // If user is not admin, only show tasks assigned to them
+      // If user is not admin, show tasks assigned to them OR unassigned tasks
       if (profile?.role !== 'admin') {
-        query = query.eq('assigned_to', user.id)
+        query = query.or(`assigned_to.eq.${user.id},assigned_to.is.null`)
       }
       
       const { data, error } = await query
