@@ -73,7 +73,11 @@ export function TaskAssignmentModal({ task, onTaskUpdated }: TaskAssignmentModal
     try {
       const { error } = await supabase
         .from('tasks')
-        .update({ assigned_to: selectedWorkerId })
+        .update({ 
+          assigned_to: selectedWorkerId,
+          status: 'pending',
+          due_date: new Date().toISOString().split('T')[0] // Set due date to today
+        })
         .eq('id', task.id)
 
       if (error) throw error
