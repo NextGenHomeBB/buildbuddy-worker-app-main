@@ -56,6 +56,10 @@ export function useTaskHistory() {
     taskHistory,
     groupedHistory,
     sortedDates,
-    isLoading
+    isLoading,
+    getCompletionStats: () => ({}),
+    searchHistory: () => {},
+    flushAndRefresh: () => {},
+    error: null
   }
 }

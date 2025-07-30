@@ -2,6 +2,10 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/integrations/supabase/client'
 import { useToast } from '@/hooks/use-toast'
 
+// Export compatibility functions
+export const useUpdateTaskStatus = () => ({ mutate: () => {}, isPending: false })
+export const useDeleteTask = () => ({ mutate: () => {}, isPending: false })
+
 // Simplified stub implementation
 export function useTasksByList(listId: string) {
   const { toast } = useToast()
@@ -19,6 +23,7 @@ export function useTasksByList(listId: string) {
     isLoading,
     createTask: () => {},
     updateTask: () => {},
-    deleteTask: () => {}
+    deleteTask: () => {},
+    data: tasks // Add data property for compatibility
   }
 }

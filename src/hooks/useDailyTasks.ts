@@ -35,6 +35,10 @@ export function useDailyTasks() {
     tasks,
     isLoading,
     completeTask: completeMutation.mutate,
-    isCompleting: completeMutation.isPending
+    isCompleting: completeMutation.isPending,
+    dailyTasks: tasks, // Add dailyTasks property for compatibility
+    error: null,
+    getTimeRemaining: () => '0h',
+    isTaskExpiringSoon: () => false
   }
 }

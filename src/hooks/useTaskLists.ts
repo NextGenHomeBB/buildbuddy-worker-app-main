@@ -36,6 +36,7 @@ export function useTaskLists() {
     taskLists,
     isLoading,
     createList: createMutation.mutate,
-    isCreating: createMutation.isPending
+    isCreating: createMutation.isPending,
+    data: taskLists // Add data property for compatibility
   }
 }
