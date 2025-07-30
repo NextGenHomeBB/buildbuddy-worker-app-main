@@ -21,7 +21,7 @@ export function useUserSetup() {
         // Check if user already has a profile
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
-          .select('id')
+          .select('id, full_name, organization_id')
           .eq('id', user.id)
           .single()
 
@@ -30,12 +30,12 @@ export function useUserSetup() {
         }
 
         if (!profile) {
-          // User doesn't have a profile, create one
+          // User doesn't have a profile, create one using the trigger-compatible function
           console.log('Creating user profile...')
           
           const { error: setupError } = await supabase.rpc('create_user_profile', {
             user_id: user.id,
-            user_email: user.email
+            user_email: user.email || ''
           })
 
           if (setupError) {
@@ -46,7 +46,7 @@ export function useUserSetup() {
           console.log('User profile created successfully')
           toast({
             title: 'Welcome!',
-            description: 'Your profile has been created. You can now start creating tasks.',
+            description: 'Your profile has been created. You can now start using the app.',
           })
         }
 
