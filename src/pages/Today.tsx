@@ -12,7 +12,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Calendar, Menu, History } from 'lucide-react'
 import { useDailyTasks } from '@/hooks/useDailyTasks'
 import { DailyTaskCard } from '@/components/DailyTaskCard'
-import { supabase } from '@/lib/supabase'
+import { supabase } from '@/integrations/supabase/client'
 import { format } from 'date-fns'
 
 export default function Today() {

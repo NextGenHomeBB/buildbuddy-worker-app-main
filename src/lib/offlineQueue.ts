@@ -1,5 +1,5 @@
 import localforage from 'localforage'
-import { supabase } from './supabase'
+import { supabase } from '@/integrations/supabase/client'
 
 export interface QueuedMutation {
   id: string

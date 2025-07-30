@@ -2,7 +2,7 @@
 import { useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
-import { WorkerTask } from '@/lib/supabase'
+import { WorkerTask } from '@/lib/types'
 import { useWorkerTasks } from '@/hooks/useWorkerTasks'
 import { TaskDetailsModal } from '@/components/TaskDetailsModal'
 import { ArrowRight, AlertTriangle, Minus, Circle } from 'lucide-react'

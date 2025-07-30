@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { supabase, WorkerTask } from '@/lib/supabase'
+import { supabase, WorkerTask } from '@/lib/types'
 import { useToast } from '@/hooks/use-toast'
 import { enqueueMutation } from '@/lib/offlineQueue'
 

@@ -148,7 +148,7 @@ export const validateOperation = async (operation: string, userId: string): Prom
   // For critical operations, also check database rate limiting
   if (['role_change', 'profile_update'].includes(operation)) {
     try {
-      const { supabase } = await import('@/lib/supabase')
+      const { supabase } = await import('@/integrations/supabase/client')
       const { data } = await supabase.rpc('check_rate_limit', {
         operation_name: operation,
         max_attempts: operation === 'role_change' ? 3 : 5,

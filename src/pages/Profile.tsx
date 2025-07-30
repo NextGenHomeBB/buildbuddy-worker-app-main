@@ -12,7 +12,7 @@ import { MobileBottomNav } from '@/components/MobileBottomNav';
 import { ImageCropper } from '@/components/ImageCropper';
 import { User, Mail, Calendar, Building, Edit, Save, X, Camera, Upload, Briefcase } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { profileValidationSchema, sanitizeText } from '@/lib/security';
 import { useAuth } from '@/contexts/AuthContext';

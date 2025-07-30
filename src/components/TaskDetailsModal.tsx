@@ -1,7 +1,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { WorkerTask, supabase } from '@/lib/supabase'
+import { WorkerTask, supabase } from '@/lib/types'
 import { AlertTriangle, Minus, Circle, Clock, Calendar, CheckCircle2, X, Building, Layers } from 'lucide-react'
 import { format } from 'date-fns'
 import { useState, useEffect } from 'react'

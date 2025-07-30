@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase'
+import { supabase } from '@/integrations/supabase/client'
 import { format, parseISO, startOfDay, endOfDay } from 'date-fns'
 import { useAuth } from '@/contexts/AuthContext'
 import { flushMutationQueue } from '@/lib/offlineQueue'
