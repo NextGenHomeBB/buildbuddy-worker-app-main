@@ -26,14 +26,19 @@ export default function Login() {
     return <Navigate to="/today" replace />
   }
 
-  const handleSignUp = async (email: string, password: string) => {
+  const handleSignUp = async (email: string, password: string, name: string, companyName: string, phoneNumber: string) => {
     const redirectUrl = `${window.location.origin}/`
     
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: redirectUrl
+        emailRedirectTo: redirectUrl,
+        data: {
+          full_name: name,
+          company_name: companyName,
+          phone_number: phoneNumber
+        }
       }
     })
     return { error }
@@ -44,7 +49,7 @@ export default function Login() {
     setLoading(true)
 
     if (isSignUp) {
-      const { error } = await handleSignUp(email, password)
+      const { error } = await handleSignUp(email, password, name, companyName, phoneNumber)
       
       if (error) {
         toast({
