@@ -1,6 +1,6 @@
 
 import { ReactNode } from 'react'
-import { Navigate } from 'react-router-dom'
+import { Navigate, useLocation } from 'react-router-dom'
 import { useUserSetup } from '@/hooks/useUserSetup'
 import { useAuth } from '@/contexts/AuthContext'
 
@@ -11,6 +11,7 @@ interface UserSetupProviderProps {
 export function UserSetupProvider({ children }: UserSetupProviderProps) {
   const { user, loading: authLoading } = useAuth()
   const { isSetupComplete, isLoading: setupLoading, needsOrganization } = useUserSetup()
+  const location = useLocation()
 
   // Show loading while auth or setup is in progress
   if (authLoading || (user && setupLoading)) {
@@ -26,8 +27,12 @@ export function UserSetupProvider({ children }: UserSetupProviderProps) {
     )
   }
 
-  // If user needs to join an organization, redirect to join screen
-  if (user && needsOrganization) {
+  // Allow access to auth pages and join-organization page without redirect
+  const allowedPaths = ['/login', '/signup', '/join-organization', '/']
+  const isOnAllowedPath = allowedPaths.includes(location.pathname)
+
+  // If user needs to join an organization and is not already on join page, redirect to join screen
+  if (user && needsOrganization && !isOnAllowedPath) {
     return <Navigate to="/join-organization" replace />
   }
 
