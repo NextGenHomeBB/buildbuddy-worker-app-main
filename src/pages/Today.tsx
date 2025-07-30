@@ -80,11 +80,18 @@ export default function Today() {
 
   // Fetch today's tasks
   const { data: tasks = [], isLoading: tasksLoading } = useQuery({
-    queryKey: ['today-tasks', user?.id],
+    queryKey: ['today-tasks', user?.id, currentOrgId],
     queryFn: async () => {
-      if (!user?.id) return []
+      if (!user?.id || !currentOrgId) return []
       
-      const { data, error } = await supabase
+      // Get user's role to determine what tasks to show
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+      
+      let query = supabase
         .from('tasks')
         .select(`
           *,
@@ -94,15 +101,22 @@ export default function Today() {
             location
           )
         `)
-        .eq('assigned_to', user.id)
+        .eq('organization_id', currentOrgId)
         .in('status', ['pending', 'in_progress'])
+      
+      // If user is not admin, only show tasks assigned to them
+      if (profile?.role !== 'admin') {
+        query = query.eq('assigned_to', user.id)
+      }
+      
+      const { data, error } = await query
         .order('priority', { ascending: false })
         .order('due_date', { ascending: true })
 
       if (error) throw error
       return data || []
     },
-    enabled: !!user?.id
+    enabled: !!user?.id && !!currentOrgId
   })
 
   // Fetch active time entry
