@@ -132,7 +132,7 @@ export const ProjectGeoMap = forwardRef<ProjectGeoMapRef>((_, ref) => {
     if (viewportProjects.length < 2 || viewportProjects.length > 10) return
 
     // Sort by priority (lowest number first)
-    const sortedProjects = [...viewportProjects].sort((a, b) => a.priority - b.priority)
+    const sortedProjects = [...viewportProjects].sort((a, b) => Number(a.priority || 0) - Number(b.priority || 0))
 
     // Draw lines between consecutive projects
     for (let i = 0; i < sortedProjects.length - 1; i++) {

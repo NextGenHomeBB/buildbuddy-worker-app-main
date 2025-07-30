@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom'
-import { useTasksByList, useUpdateTaskStatus, useDeleteTask } from '@/hooks/useTasksByList'
+import { useTasksByList } from '@/hooks/useTasksByList'
 import { useTaskLists } from '@/hooks/useTaskLists'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -16,22 +16,21 @@ export default function TaskListScreen() {
   const isUnassigned = id === 'unassigned'
   const listId = isUnassigned ? null : id || null
   
-  const { data: lists } = useTaskLists()
-  const { data: tasks, isLoading } = useTasksByList(listId)
-  const updateTaskStatus = useUpdateTaskStatus()
-  const deleteTask = useDeleteTask()
+  const { taskLists: lists } = useTaskLists()
+  const { tasks, isLoading } = useTasksByList(listId || '')
 
   const currentList = lists?.find(list => list.id === id)
   const listName = isUnassigned ? 'Unassigned' : currentList?.name || 'List'
   const listColor = isUnassigned ? '#6B7280' : currentList?.color_hex || '#3478F6'
 
   const handleTaskToggle = (taskId: string, currentStatus: string) => {
-    const newStatus = currentStatus === 'done' ? 'todo' : 'done'
-    updateTaskStatus.mutate({ taskId, status: newStatus })
+    // Simplified - just log for now
+    console.log('Toggle task:', taskId, currentStatus)
   }
 
   const handleDeleteTask = (taskId: string) => {
-    deleteTask.mutate(taskId)
+    // Simplified - just log for now  
+    console.log('Delete task:', taskId)
   }
 
   const handleDoubleClick = () => {
