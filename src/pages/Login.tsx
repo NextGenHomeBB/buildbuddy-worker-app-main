@@ -56,11 +56,11 @@ export default function Login() {
         if (error.message.includes('User already registered') || error.message.includes('already been registered')) {
           toast({
             title: 'Account Already Exists',
-            description: 'This email is already registered. Please sign in instead or use a different email.',
-            variant: 'destructive',
+            description: 'Switching to sign in mode. Your email is pre-filled.',
+            variant: 'default',
           })
-          // Auto-switch to sign in mode
-          setTimeout(() => setIsSignUp(false), 2000)
+          // Immediately switch to sign in mode and keep email
+          setIsSignUp(false)
         } else if (error.message.includes('Password should be at least')) {
           toast({
             title: 'Password Too Weak',
