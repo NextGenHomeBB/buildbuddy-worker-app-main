@@ -7,6 +7,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { ArrowLeft, Plus, Trash2, LoaderCircle, Inbox } from 'lucide-react'
 import { AddTaskDialog } from '@/components/AddTaskDialog'
 import { useState } from 'react'
+import { MobileBottomNav } from '@/components/MobileBottomNav'
 
 export default function TaskListScreen() {
   const { id } = useParams<{ id: string }>()
@@ -47,7 +48,7 @@ export default function TaskListScreen() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen pb-20 lg:pb-0">
       {/* Header */}
       <div className="sticky top-0 z-10 bg-background border-b">
         <div
@@ -161,6 +162,8 @@ export default function TaskListScreen() {
         onClose={() => setShowAddTask(false)}
         defaultListId={isUnassigned ? undefined : id}
       />
+
+      <MobileBottomNav />
     </div>
   )
 }

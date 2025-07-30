@@ -10,6 +10,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useOrganization } from '@/contexts/OrganizationContext'
 import { useToast } from '@/hooks/use-toast'
 import { format, isToday, isTomorrow, isThisWeek } from 'date-fns'
+import { MobileBottomNav } from '@/components/MobileBottomNav'
 
 interface Task {
   id: string
@@ -280,7 +281,7 @@ export default function Today() {
   )
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="container mx-auto p-6 space-y-6 pb-20 lg:pb-0">
       {/* Header */}
       <div className="space-y-2">
         <h1 className="text-3xl font-bold">{getGreeting()}</h1>
@@ -375,6 +376,8 @@ export default function Today() {
           )}
         </TabsContent>
       </Tabs>
+      
+      <MobileBottomNav />
     </div>
   )
 }

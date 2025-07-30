@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useToast } from '@/hooks/use-toast'
 import { ImageCropper } from '@/components/ImageCropper'
+import { MobileBottomNav } from '@/components/MobileBottomNav'
 
 // Simplified Profile page that works with existing schema
 export default function Profile() {
@@ -53,7 +54,7 @@ export default function Profile() {
   }
 
   return (
-    <div className="container mx-auto p-6">
+    <div className="container mx-auto p-6 pb-20 lg:pb-0">
       <Card>
         <CardHeader>
           <CardTitle>Profile Settings</CardTitle>
@@ -90,6 +91,8 @@ export default function Profile() {
           </form>
         </CardContent>
       </Card>
+
+      <MobileBottomNav />
     </div>
   )
 }

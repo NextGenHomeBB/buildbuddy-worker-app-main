@@ -20,6 +20,7 @@ import {
 } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/integrations/supabase/client'
+import { MobileBottomNav } from '@/components/MobileBottomNav'
 import { useAuth } from '@/contexts/AuthContext'
 import { useOrganization } from '@/contexts/OrganizationContext'
 import { useNavigate } from 'react-router-dom'
@@ -283,7 +284,7 @@ export default function Projects() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="container mx-auto p-6 space-y-6 pb-20 lg:pb-0">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -374,6 +375,8 @@ export default function Projects() {
           </CardContent>
         </Card>
       )}
+
+      <MobileBottomNav />
     </div>
   )
 }

@@ -3,13 +3,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Plus, List } from 'lucide-react'
 import { NewListModal } from '@/components/NewListModal'
+import { MobileBottomNav } from '@/components/MobileBottomNav'
 
 // Simplified Lists Home Screen
 export default function ListsHomeScreen() {
   const [showNewListModal, setShowNewListModal] = useState(false)
 
   return (
-    <div className="container mx-auto p-6">
+    <div className="container mx-auto p-6 pb-20 lg:pb-0">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-3xl font-bold">Task Lists</h1>
@@ -52,6 +53,8 @@ export default function ListsHomeScreen() {
         open={showNewListModal}
         onOpenChange={setShowNewListModal}
       />
+
+      <MobileBottomNav />
     </div>
   )
 }

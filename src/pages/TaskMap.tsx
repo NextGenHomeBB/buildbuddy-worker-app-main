@@ -3,6 +3,7 @@ import { ProjectGeoMap } from '@/components/ProjectGeoMap'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, Map } from 'lucide-react'
 import { useIsMobile } from '@/hooks/use-mobile'
+import { MobileBottomNav } from '@/components/MobileBottomNav'
 
 export default function TaskMap() {
   const navigate = useNavigate()
@@ -55,6 +56,8 @@ export default function TaskMap() {
           </div>
         </div>
       )}
+
+      <MobileBottomNav />
     </div>
   )
 }

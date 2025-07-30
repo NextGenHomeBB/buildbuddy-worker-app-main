@@ -1,11 +1,12 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { CalendarDays } from 'lucide-react'
+import { MobileBottomNav } from '@/components/MobileBottomNav'
 
 // Simplified Calendar component
 export default function Calendar() {
   return (
-    <div className="container mx-auto p-6">
+    <div className="container mx-auto p-6 pb-20 lg:pb-0">
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
@@ -26,6 +27,8 @@ export default function Calendar() {
           </div>
         </CardContent>
       </Card>
+
+      <MobileBottomNav />
     </div>
   )
 }
