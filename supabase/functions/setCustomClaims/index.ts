@@ -16,7 +16,7 @@ serve(async (req) => {
   try {
     const { uid, organization_id } = await req.json();
     
-    console.log('Setting custom claims for user:', uid, 'org:', organization_id);
+    console.log('Setting custom claims for user:', uid, 'invite code:', organization_id);
 
     if (!uid || !organization_id) {
       return new Response(
@@ -39,11 +39,56 @@ serve(async (req) => {
       }
     });
 
-    // Verify organization exists
+    // Look up invite code to get organization_id
+    const { data: inviteCode, error: inviteError } = await supabase
+      .from('invite_codes')
+      .select('organization_id, expires_at, is_active, current_uses, max_uses')
+      .eq('code', organization_id)
+      .eq('is_active', true)
+      .single();
+
+    if (inviteError || !inviteCode) {
+      console.error('Invite code not found or inactive:', inviteError);
+      return new Response(
+        JSON.stringify({ error: 'Invalid organization code' }), 
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
+
+    // Check if invite code has expired
+    if (inviteCode.expires_at && new Date(inviteCode.expires_at) < new Date()) {
+      console.error('Invite code has expired');
+      return new Response(
+        JSON.stringify({ error: 'Invite code has expired' }), 
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
+
+    // Check if invite code has reached max uses
+    if (inviteCode.max_uses && inviteCode.current_uses >= inviteCode.max_uses) {
+      console.error('Invite code has reached maximum uses');
+      return new Response(
+        JSON.stringify({ error: 'Invite code has reached maximum uses' }), 
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
+
+    const actualOrgId = inviteCode.organization_id;
+
+    // Get organization details
     const { data: org, error: orgError } = await supabase
       .from('organizations')
       .select('id, name')
-      .eq('id', organization_id)
+      .eq('id', actualOrgId)
       .single();
 
     if (orgError || !org) {
@@ -60,7 +105,7 @@ serve(async (req) => {
     // Update user metadata with organization_id and role
     const { error: updateError } = await supabase.auth.admin.updateUserById(uid, {
       user_metadata: {
-        organization_id: organization_id,
+        organization_id: actualOrgId,
         role: 'worker' // Default role
       }
     });
@@ -74,6 +119,17 @@ serve(async (req) => {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
         }
       );
+    }
+
+    // Increment invite code usage count
+    const { error: incrementError } = await supabase
+      .from('invite_codes')
+      .update({ current_uses: (inviteCode.current_uses || 0) + 1 })
+      .eq('code', organization_id);
+
+    if (incrementError) {
+      console.error('Error incrementing invite code usage:', incrementError);
+      // Don't fail the request for this, just log the error
     }
 
     console.log('Successfully updated user claims');
