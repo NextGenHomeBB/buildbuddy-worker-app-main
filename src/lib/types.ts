@@ -35,6 +35,31 @@ export interface TaskHistoryItem {
   created_at: string
 }
 
+// Additional types for compatibility
+export interface TaskList {
+  id: string
+  name: string
+  description?: string
+  created_at: string
+}
+
+export interface TaskRelation {
+  id: string
+  src_task: string
+  dest_task: string
+  relation: string
+  created_at: string
+}
+
+export interface TaskMapTask {
+  id: string
+  title: string
+  status: string
+  priority: string
+  assignee: string
+  project_id: string
+}
+
 // Re-export the supabase client
 export { supabase } from '@/integrations/supabase/client'
 export type { Database } from '@/integrations/supabase/types'

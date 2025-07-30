@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/use-toast'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from '@/contexts/AuthContext'
+import { useOrganization } from '@/contexts/OrganizationContext'
 import { Plus } from 'lucide-react'
 import { taskValidationSchema, sanitizeText } from '@/lib/security'
 
@@ -30,6 +31,7 @@ export function AddTaskDialog({ trigger, onClose, defaultListId, open: externalO
   const [listId, setListId] = useState(defaultListId || '')
   const { toast } = useToast()
   const { user } = useAuth()
+  const { currentOrgId } = useOrganization()
   const queryClient = useQueryClient()
 
   // Use external open state if provided, otherwise use internal state
@@ -62,11 +64,11 @@ export function AddTaskDialog({ trigger, onClose, defaultListId, open: externalO
         title: taskData.title,
         description: taskData.description || null,
         priority: taskData.priority,
-        assignee: user?.id,
-        status: 'todo',
+        assigned_to: user?.id || null,
+        status: 'pending',
         project_id: userProjectRole?.project_id || null,
-        phase_id: null, // We can add phase selection later
-        list_id: listId || null,
+        phase_id: null,
+        organization_id: currentOrgId || '',
       }
 
       console.log('Inserting task:', taskToInsert)

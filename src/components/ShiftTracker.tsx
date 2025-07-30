@@ -71,17 +71,23 @@ export function ShiftTracker() {
     const today = new Date().toISOString().split('T')[0]
     
     const { data, error } = await supabase
-      .from('time_sheets')
-      .select('hours')
+      .from('time_entries')
+      .select('*')
       .eq('user_id', user.id)
-      .eq('work_date', today)
+      .gte('start_ts', today + 'T00:00:00Z')
+      .lt('start_ts', today + 'T23:59:59Z')
 
     if (error) {
       console.error('Error loading today hours:', error)
       return
     }
 
-    const total = data.reduce((sum, sheet) => sum + (sheet.hours || 0), 0)
+    const total = data.reduce((sum, entry) => {
+      const start = new Date(entry.start_ts)
+      const end = entry.end_ts ? new Date(entry.end_ts) : new Date()
+      const hours = (end.getTime() - start.getTime()) / (1000 * 60 * 60)
+      return sum + hours
+    }, 0)
     setTodayHours(total)
   }
 
@@ -111,12 +117,13 @@ export function ShiftTracker() {
 
     try {
       const { error } = await supabase
-        .from('time_sheets')
+        .from('time_entries')
         .insert({
           user_id: user.id,
-          work_date: today,
-          hours: hoursWorked,
-          note: `Shift: ${shiftStartTime.toLocaleTimeString()} - ${endTime.toLocaleTimeString()}`
+          start_ts: shiftStartTime.toISOString(),
+          end_ts: endTime.toISOString(),
+          notes: `Shift: ${shiftStartTime.toLocaleTimeString()} - ${endTime.toLocaleTimeString()}`,
+          organization_id: user.user_metadata?.organization_id
         })
 
       if (error) throw error

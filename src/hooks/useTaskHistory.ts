@@ -1,214 +1,61 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/integrations/supabase/client'
 import { format, parseISO, startOfDay, endOfDay } from 'date-fns'
-import { useAuth } from '@/contexts/AuthContext'
-import { flushMutationQueue } from '@/lib/offlineQueue'
 
-export interface TaskHistoryItem {
-  id: string
-  daily_assignment_id: string
-  worker_id: string
-  project_id?: string
-  task_title: string
-  task_description?: string
-  completion_date: string
-  completed_at: string
-  created_at: string
-  project?: {
-    name: string
-  }
-}
-
-export interface GroupedTaskHistory {
-  date: string
-  displayDate: string
-  tasks: TaskHistoryItem[]
-}
-
-export function useTaskHistory(startDate?: Date, endDate?: Date, projectId?: string) {
-  const { user } = useAuth()
-  const queryClient = useQueryClient()
-  
-  const {
-    data: history,
-    isLoading,
-    error,
-    refetch
-  } = useQuery({
-    queryKey: ['task-history', user?.id, startDate, endDate, projectId],
-    enabled: !!user,
+// Simplified version using actual tables
+export function useTaskHistory() {
+  const { data: taskHistory = [], isLoading } = useQuery({
+    queryKey: ['task-history'],
     queryFn: async () => {
-      // Fetch both daily task completion history and completed worker tasks
-      const [dailyTasksResponse, workerTasksResponse] = await Promise.all([
-        // Daily task completion history
-        supabase
-          .from('task_completion_history')
-          .select(`
-            *,
-            project:projects (
-              name
-            )
-          `)
-          .eq('worker_id', user!.id)
-          .order('completed_at', { ascending: false }),
-        
-        // Completed worker tasks
-        supabase
-          .from('tasks')
-          .select(`
+      // Use actual tasks table instead of non-existent history table
+      const { data, error } = await supabase
+        .from('tasks')
+        .select(`
+          *,
+          projects:project_id (
             id,
-            title,
-            description,
-            completed_at,
-            project_id,
-            assignee,
-            project:projects (
-              name
-            )
-          `)
-          .eq('status', 'done')
-          .eq('assignee', user!.id)
-          .not('completed_at', 'is', null)
-          .order('completed_at', { ascending: false })
-      ])
+            name
+          )
+        `)
+        .eq('status', 'completed')
+        .order('updated_at', { ascending: false })
+        .limit(50)
 
-      if (dailyTasksResponse.error) throw dailyTasksResponse.error
-      if (workerTasksResponse.error) throw workerTasksResponse.error
+      if (error) throw error
 
-      // Transform worker tasks to match history format
-      const transformedWorkerTasks = (workerTasksResponse.data || []).map(task => ({
+      // Map to expected format
+      return (data || []).map(task => ({
         id: task.id,
-        daily_assignment_id: '', // Not applicable for worker tasks
-        worker_id: task.assignee || '',
+        daily_assignment_id: task.id, // Use task id as assignment id
+        worker_id: task.assigned_to,
         project_id: task.project_id,
         task_title: task.title,
         task_description: task.description,
-        completion_date: task.completed_at ? task.completed_at.split('T')[0] : '',
-        completed_at: task.completed_at || '',
-        created_at: task.completed_at || '',
-        project: task.project
+        completion_date: task.updated_at?.split('T')[0] || '',
+        completed_at: task.updated_at,
+        created_at: task.created_at,
+        project: task.projects
       }))
-
-      // Combine and sort all history items
-      const allHistory = [
-        ...(dailyTasksResponse.data || []),
-        ...transformedWorkerTasks
-      ].sort((a, b) => new Date(b.completed_at).getTime() - new Date(a.completed_at).getTime())
-
-      // Apply filters if provided
-      let filteredHistory = allHistory
-
-      if (startDate) {
-        filteredHistory = filteredHistory.filter(item => 
-          item.completion_date >= format(startDate, 'yyyy-MM-dd')
-        )
-      }
-      if (endDate) {
-        filteredHistory = filteredHistory.filter(item => 
-          item.completion_date <= format(endDate, 'yyyy-MM-dd')
-        )
-      }
-      if (projectId) {
-        filteredHistory = filteredHistory.filter(item => 
-          item.project_id === projectId
-        )
-      }
-
-      return filteredHistory as TaskHistoryItem[]
     }
   })
 
-  // Function to flush offline queue and refresh history
-  const flushAndRefresh = async () => {
-    try {
-      console.log('Flushing offline queue...')
-      const result = await flushMutationQueue()
-      console.log('Queue flush result:', result)
-      
-      if (result.success > 0) {
-        // Invalidate and refetch task history when offline tasks are synced
-        await queryClient.invalidateQueries({ queryKey: ['task-history'] })
-        console.log('Task history refreshed after queue flush')
-      }
-      
-      return result
-    } catch (error) {
-      console.error('Failed to flush offline queue:', error)
-      return { success: 0, failed: 0 }
-    }
-  }
-
-  // Group tasks by completion date
-  const groupedHistory: GroupedTaskHistory[] = history?.reduce((groups, task) => {
+  // Group by date for display
+  const groupedHistory = taskHistory.reduce((acc, task) => {
     const date = task.completion_date
-    const existingGroup = groups.find(group => group.date === date)
-    
-    if (existingGroup) {
-      existingGroup.tasks.push(task)
-    } else {
-      const parsedDate = parseISO(date + 'T00:00:00')
-      const today = startOfDay(new Date())
-      const yesterday = startOfDay(new Date(Date.now() - 24 * 60 * 60 * 1000))
-      
-      let displayDate: string
-      if (startOfDay(parsedDate).getTime() === today.getTime()) {
-        displayDate = `Today (${format(parsedDate, 'MMM d, yyyy')})`
-      } else if (startOfDay(parsedDate).getTime() === yesterday.getTime()) {
-        displayDate = `Yesterday (${format(parsedDate, 'MMM d, yyyy')})`
-      } else {
-        displayDate = format(parsedDate, 'MMMM d, yyyy')
-      }
-      
-      groups.push({
-        date,
-        displayDate,
-        tasks: [task]
-      })
+    if (!acc[date]) {
+      acc[date] = []
     }
-    
-    return groups
-  }, [] as GroupedTaskHistory[]) || []
+    acc[date].push(task)
+    return acc
+  }, {} as Record<string, typeof taskHistory>)
 
-  // Search function
-  const searchHistory = (searchTerm: string) => {
-    if (!searchTerm.trim()) return groupedHistory
-    
-    const filtered = groupedHistory.map(group => ({
-      ...group,
-      tasks: group.tasks.filter(task =>
-        task.task_title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        task.task_description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        task.project?.name?.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-    })).filter(group => group.tasks.length > 0)
-    
-    return filtered
-  }
-
-  // Get completion stats for a date range
-  const getCompletionStats = () => {
-    if (!history) return { totalTasks: 0, totalProjects: 0, averagePerDay: 0 }
-    
-    const totalTasks = history.length
-    const uniqueProjects = new Set(history.map(task => task.project_id)).size
-    const uniqueDays = new Set(history.map(task => task.completion_date)).size
-    const averagePerDay = uniqueDays > 0 ? Math.round((totalTasks / uniqueDays) * 10) / 10 : 0
-    
-    return {
-      totalTasks,
-      totalProjects: uniqueProjects,
-      averagePerDay
-    }
-  }
+  // Sort dates descending
+  const sortedDates = Object.keys(groupedHistory).sort((a, b) => b.localeCompare(a))
 
   return {
-    history: history || [],
+    taskHistory,
     groupedHistory,
-    isLoading,
-    error,
-    searchHistory,
-    getCompletionStats,
-    flushAndRefresh,
-    refetch
+    sortedDates,
+    isLoading
   }
 }

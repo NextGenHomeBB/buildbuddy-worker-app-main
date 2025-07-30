@@ -1,104 +1,62 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase, WorkerTask } from '@/lib/types'
 import { useToast } from '@/hooks/use-toast'
-import { enqueueMutation } from '@/lib/offlineQueue'
 
+// Simplified version using actual tasks table
 export function useMyTasks() {
   const { toast } = useToast()
   const queryClient = useQueryClient()
 
-  const {
-    data: tasks,
-    isLoading,
-    error
-  } = useQuery({
+  const { data: tasks = [], isLoading, error } = useQuery({
     queryKey: ['my-tasks'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('worker.my_tasks_view')
+        .from('tasks')
         .select('*')
+        .eq('assigned_to', (await supabase.auth.getUser()).data.user?.id)
         .order('created_at', { ascending: false })
 
       if (error) throw error
-      return data as WorkerTask[]
+      
+      // Map to WorkerTask format
+      return (data || []).map(task => ({
+        id: task.id,
+        title: task.title,
+        description: task.description,
+        status: task.status === 'completed' ? 'completed' : 'pending',
+        priority: task.priority as 'low' | 'medium' | 'high',
+        assigned_worker_id: task.assigned_to || '',
+        created_at: task.created_at,
+        updated_at: task.updated_at,
+        due_date: task.due_date
+      })) as WorkerTask[]
     }
   })
 
-  const updateTaskStatus = useMutation({
-    mutationFn: async ({ taskId, status }: { taskId: string; status: WorkerTask['status'] }) => {
-      const patch = { 
-        status: status === 'completed' ? 'done' : 'todo', 
-        updated_at: new Date().toISOString(),
-        completed_at: status === 'completed' ? new Date().toISOString() : null
-      }
-      
-      if (!navigator.onLine) {
-        // Queue the mutation for when we come back online
-        await enqueueMutation({
-          table: 'tasks',
-          recordId: taskId,
-          patch
-        })
-        return { queued: true }
-      }
-
-      // Try to execute immediately when online
+  const completeMutation = useMutation({
+    mutationFn: async (taskId: string) => {
       const { error } = await supabase
         .from('tasks')
-        .update(patch)
+        .update({ status: 'completed' })
         .eq('id', taskId)
 
       if (error) throw error
-      return { queued: false }
+      return taskId
     },
-    onMutate: async ({ taskId, status }) => {
-      // Optimistic update
-      await queryClient.cancelQueries({ queryKey: ['my-tasks'] })
-      
-      const previousTasks = queryClient.getQueryData<WorkerTask[]>(['my-tasks'])
-      
-      queryClient.setQueryData<WorkerTask[]>(['my-tasks'], (old = []) =>
-        old.map(task =>
-          task.id === taskId ? { ...task, status } : task
-        )
-      )
-      
-      return { previousTasks }
-    },
-    onSuccess: (data, { status }) => {
-      if (data?.queued) {
-        toast({
-          title: 'Queued while offline',
-          description: `Task will be updated when connection is restored`,
-        })
-      } else {
-        queryClient.invalidateQueries({ queryKey: ['my-tasks'] })
-        toast({
-          title: 'Task Updated',
-          description: `Task marked as ${status === 'completed' ? 'completed' : 'pending'}`,
-        })
-      }
-    },
-    onError: (error, variables, context) => {
-      // Revert optimistic update
-      if (context?.previousTasks) {
-        queryClient.setQueryData(['my-tasks'], context.previousTasks)
-      }
-      
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['my-tasks'] })
       toast({
-        title: 'Error',
-        description: 'Failed to update task status',
-        variant: 'destructive',
+        title: 'Task completed',
+        description: 'Task has been marked as complete',
       })
-      console.error('Task update error:', error)
     }
   })
 
   return {
-    tasks: tasks || [],
+    tasks,
     isLoading,
     error,
-    updateTaskStatus: updateTaskStatus.mutate,
-    isUpdating: updateTaskStatus.isPending
+    completeTask: completeMutation.mutate,
+    isCompleting: completeMutation.isPending
   }
 }

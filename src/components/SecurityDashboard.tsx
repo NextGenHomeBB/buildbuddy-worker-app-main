@@ -39,16 +39,7 @@ export function SecurityDashboard() {
     try {
       setLoading(true)
       
-      // Fetch recent security audit logs
-      const { data: events, error: eventsError } = await supabase
-        .from('security_audit_log')
-        .select('*')
-        .order('timestamp', { ascending: false })
-        .limit(100)
-
-      if (eventsError) throw eventsError
-
-      // Fetch recent rate limit violations
+      // Fetch recent rate limit violations (simplified security dashboard)
       const { data: limits, error: limitsError } = await supabase
         .from('rate_limits')
         .select('*')
@@ -57,8 +48,12 @@ export function SecurityDashboard() {
 
       if (limitsError) throw limitsError
 
-      setSecurityEvents(events || [])
-      setRateLimits(limits || [])
+      // For now, we'll only show rate limits since security_audit_log doesn't exist
+      setSecurityEvents([])
+      setRateLimits((limits || []).map(limit => ({
+        ...limit,
+        operation: limit.operation_name  // Map operation_name to operation
+      })))
     } catch (error) {
       console.error('Failed to fetch security data:', error)
       toast({
