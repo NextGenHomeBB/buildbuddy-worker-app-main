@@ -7,12 +7,14 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { OrganizationProvider } from "@/contexts/OrganizationContext";
 import { RequireAuth } from "@/components/RequireAuth";
 import { UserSetupProvider } from "@/components/UserSetupProvider";
 import i18n from './i18n';
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
+import JoinOrganization from "./pages/JoinOrganization";
 import Today from "./pages/Today";
 import Calendar from "./pages/Calendar";
 import Projects from "./pages/Projects";
@@ -60,7 +62,8 @@ const App = () => {
     <I18nextProvider i18n={i18n}>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
-          <UserSetupProvider>
+          <OrganizationProvider>
+            <UserSetupProvider>
             <TooltipProvider>
               <Toaster />
               <Sonner />
@@ -69,6 +72,7 @@ const App = () => {
                   <Route path="/" element={<Index />} />
                   <Route path="/login" element={<Login />} />
                   <Route path="/signup" element={<SignUp />} />
+                  <Route path="/join-organization" element={<JoinOrganization />} />
                   <Route path="/today" element={
                     <RequireAuth>
                       <Today />
@@ -163,6 +167,7 @@ const App = () => {
               </BrowserRouter>
             </TooltipProvider>
           </UserSetupProvider>
+          </OrganizationProvider>
         </AuthProvider>
       </QueryClientProvider>
     </I18nextProvider>

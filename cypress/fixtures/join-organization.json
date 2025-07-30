@@ -1,0 +1,7 @@
+{
+  "success": true,
+  "organization": {
+    "id": "test-org-id",
+    "name": "Test Organization"
+  }
+}

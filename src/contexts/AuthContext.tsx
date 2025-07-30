@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
 import { User, Session, AuthError } from '@supabase/supabase-js'
-import { supabase } from '@/lib/supabase'
+import { supabase } from '@/integrations/supabase/client'
 import { authRateLimiter } from '@/lib/security'
 
 interface AuthContextType {
@@ -8,6 +8,7 @@ interface AuthContextType {
   session: Session | null
   loading: boolean
   userRole: string | null
+  hasOrganization: boolean
   isAdmin: boolean
   isManager: boolean
   signIn: (email: string, password: string) => Promise<{ error?: AuthError }>
@@ -90,11 +91,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await supabase.auth.signOut()
   }
 
+  const hasOrganization = user?.user_metadata?.organization_id ? true : false
+
   const value = {
     user,
     session,
     loading,
     userRole,
+    hasOrganization,
     isAdmin: userRole === 'admin',
     isManager: userRole === 'manager',
     signIn,

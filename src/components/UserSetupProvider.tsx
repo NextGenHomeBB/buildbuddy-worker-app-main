@@ -1,5 +1,6 @@
 
 import { ReactNode } from 'react'
+import { Navigate } from 'react-router-dom'
 import { useUserSetup } from '@/hooks/useUserSetup'
 import { useAuth } from '@/contexts/AuthContext'
 
@@ -9,7 +10,7 @@ interface UserSetupProviderProps {
 
 export function UserSetupProvider({ children }: UserSetupProviderProps) {
   const { user, loading: authLoading } = useAuth()
-  const { isSetupComplete, isLoading: setupLoading } = useUserSetup()
+  const { isSetupComplete, isLoading: setupLoading, needsOrganization } = useUserSetup()
 
   // Show loading while auth or setup is in progress
   if (authLoading || (user && setupLoading)) {
@@ -23,6 +24,11 @@ export function UserSetupProvider({ children }: UserSetupProviderProps) {
         </div>
       </div>
     )
+  }
+
+  // If user needs to join an organization, redirect to join screen
+  if (user && needsOrganization) {
+    return <Navigate to="/join-organization" replace />
   }
 
   return <>{children}</>
