@@ -52,26 +52,64 @@ export default function Login() {
       const { error } = await handleSignUp(email, password, name, companyName, phoneNumber)
       
       if (error) {
-        toast({
-          title: 'Sign Up Failed',
-          description: error.message,
-          variant: 'destructive',
-        })
+        // Handle specific signup errors with better messaging
+        if (error.message.includes('User already registered') || error.message.includes('already been registered')) {
+          toast({
+            title: 'Account Already Exists',
+            description: 'This email is already registered. Please sign in instead or use a different email.',
+            variant: 'destructive',
+          })
+          // Auto-switch to sign in mode
+          setTimeout(() => setIsSignUp(false), 2000)
+        } else if (error.message.includes('Password should be at least')) {
+          toast({
+            title: 'Password Too Weak',
+            description: 'Password should be at least 6 characters long.',
+            variant: 'destructive',
+          })
+        } else {
+          toast({
+            title: 'Sign Up Failed',
+            description: error.message,
+            variant: 'destructive',
+          })
+        }
       } else {
         toast({
           title: 'Account Created!',
           description: 'Please check your email to verify your account.',
         })
+        // Clear the form
+        setEmail('')
+        setPassword('')
+        setName('')
+        setCompanyName('')
+        setPhoneNumber('')
       }
     } else {
       const { error } = await signIn(email, password)
 
       if (error) {
-        toast({
-          title: 'Login Failed',
-          description: error.message,
-          variant: 'destructive',
-        })
+        // Handle specific login errors
+        if (error.message.includes('Invalid login credentials')) {
+          toast({
+            title: 'Login Failed',
+            description: 'Invalid email or password. Please check your credentials.',
+            variant: 'destructive',
+          })
+        } else if (error.message.includes('Email not confirmed')) {
+          toast({
+            title: 'Email Not Verified',
+            description: 'Please check your email and click the verification link.',
+            variant: 'destructive',
+          })
+        } else {
+          toast({
+            title: 'Login Failed',
+            description: error.message,
+            variant: 'destructive',
+          })
+        }
       } else {
         toast({
           title: 'Welcome back!',
