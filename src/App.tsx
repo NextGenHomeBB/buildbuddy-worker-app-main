@@ -24,6 +24,11 @@ import ListsHomeScreen from "./pages/ListsHomeScreen";
 import TaskListScreen from "./pages/TaskListScreen";
 import TaskHistory from "./pages/TaskHistory";
 import NotFound from "./pages/NotFound";
+import AdminDashboard from "./pages/AdminDashboard";
+import AdminUsers from "./pages/AdminUsers";
+import AdminProjects from "./pages/AdminProjects";
+import AdminLayout from "./components/AdminLayout";
+import { RequireRole } from "./components/RequireRole";
 import { registerOnlineListener } from "@/lib/offlineQueue";
 
 const queryClient = new QueryClient({
@@ -104,6 +109,30 @@ const App = () => {
                   <Route path="/lists" element={<RequireAuth><ListsHomeScreen /></RequireAuth>} />
                   <Route path="/lists/:id" element={<RequireAuth><TaskListScreen /></RequireAuth>} />
                   <Route path="/history" element={<RequireAuth><TaskHistory /></RequireAuth>} />
+                  
+                  {/* Admin Routes */}
+                  <Route path="/admin" element={
+                    <RequireRole allowedRoles={['admin']}>
+                      <AdminLayout>
+                        <AdminDashboard />
+                      </AdminLayout>
+                    </RequireRole>
+                  } />
+                  <Route path="/admin/users" element={
+                    <RequireRole allowedRoles={['admin']}>
+                      <AdminLayout>
+                        <AdminUsers />
+                      </AdminLayout>
+                    </RequireRole>
+                  } />
+                  <Route path="/admin/projects" element={
+                    <RequireRole allowedRoles={['admin']}>
+                      <AdminLayout>
+                        <AdminProjects />
+                      </AdminLayout>
+                    </RequireRole>
+                  } />
+                  
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>

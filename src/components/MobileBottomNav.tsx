@@ -1,11 +1,13 @@
-import { Home, Calendar, List, Briefcase, Map } from 'lucide-react'
+import { Home, Calendar, List, Briefcase, Map, Settings } from 'lucide-react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { useAuth } from '@/contexts/AuthContext'
 import { AddTaskDialog } from './AddTaskDialog'
 
 export function MobileBottomNav() {
   const location = useLocation()
   const { t } = useTranslation()
+  const { isAdmin } = useAuth()
 
   const navItems = [
     { icon: Home, label: t('navigation.today'), path: '/today' },
@@ -13,6 +15,7 @@ export function MobileBottomNav() {
     { icon: List, label: t('navigation.lists'), path: '/lists' },
     { icon: Map, label: 'Map', path: '/map' },
     { icon: Briefcase, label: t('navigation.projects'), path: '/projects' },
+    ...(isAdmin ? [{ icon: Settings, label: 'Admin', path: '/admin' }] : []),
   ]
 
   return (

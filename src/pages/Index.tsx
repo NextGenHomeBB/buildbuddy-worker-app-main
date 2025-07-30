@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { ArrowRight, CheckSquare, Users, Clock } from 'lucide-react'
 
 const Index = () => {
-  const { user, loading } = useAuth()
+  const { user, loading, isAdmin } = useAuth()
 
   if (loading) {
     return (
@@ -15,9 +15,9 @@ const Index = () => {
     )
   }
 
-  // Redirect authenticated users to today's tasks
+  // Redirect authenticated users based on their role
   if (user) {
-    return <Navigate to="/today" replace />
+    return <Navigate to={isAdmin ? "/admin" : "/today"} replace />
   }
 
   return (
