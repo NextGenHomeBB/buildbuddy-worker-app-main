@@ -84,12 +84,17 @@ export default function Today() {
     queryFn: async () => {
       if (!user?.id || !currentOrgId) return []
       
+      console.log('🔍 Today.tsx - Fetching tasks for user:', user.id)
+      console.log('🔍 Today.tsx - Organization ID:', currentOrgId)
+      
       // Get user's role to determine what tasks to show
       const { data: profile } = await supabase
         .from('profiles')
         .select('role')
         .eq('id', user.id)
         .single()
+      
+      console.log('🔍 Today.tsx - User profile:', profile)
       
       let query = supabase
         .from('tasks')
@@ -104,16 +109,25 @@ export default function Today() {
         .eq('organization_id', currentOrgId)
         .in('status', ['pending', 'in_progress'])
       
+      console.log('🔍 Today.tsx - Base query built')
+      
       // If user is not admin, only show tasks assigned to them
       if (profile?.role !== 'admin') {
         query = query.eq('assigned_to', user.id)
+        console.log('🔍 Today.tsx - Adding assigned_to filter for user:', user.id)
       }
       
       const { data, error } = await query
         .order('priority', { ascending: false })
         .order('due_date', { ascending: true })
 
-      if (error) throw error
+      console.log('🔍 Today.tsx - Query result:', { data, error })
+      console.log('🔍 Today.tsx - Number of tasks found:', data?.length || 0)
+      
+      if (error) {
+        console.error('🔍 Today.tsx - Query error:', error)
+        throw error
+      }
       return data || []
     },
     enabled: !!user?.id && !!currentOrgId
