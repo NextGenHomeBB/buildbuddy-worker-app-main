@@ -27,6 +27,9 @@ import NotFound from "./pages/NotFound";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminUsers from "./pages/AdminUsers";
 import AdminProjects from "./pages/AdminProjects";
+import AdminReports from "./pages/AdminReports";
+import AdminTimeTracking from "./pages/AdminTimeTracking";
+import AdminSettings from "./pages/AdminSettings";
 import AdminLayout from "./components/AdminLayout";
 import { RequireRole } from "./components/RequireRole";
 import { registerOnlineListener } from "@/lib/offlineQueue";
@@ -129,6 +132,27 @@ const App = () => {
                     <RequireRole allowedRoles={['admin']}>
                       <AdminLayout>
                         <AdminProjects />
+                      </AdminLayout>
+                    </RequireRole>
+                  } />
+                  <Route path="/admin/reports" element={
+                    <RequireRole allowedRoles={['admin']}>
+                      <AdminLayout>
+                        <AdminReports />
+                      </AdminLayout>
+                    </RequireRole>
+                  } />
+                  <Route path="/admin/time-tracking" element={
+                    <RequireRole allowedRoles={['admin']}>
+                      <AdminLayout>
+                        <AdminTimeTracking />
+                      </AdminLayout>
+                    </RequireRole>
+                  } />
+                  <Route path="/admin/settings" element={
+                    <RequireRole allowedRoles={['admin']}>
+                      <AdminLayout>
+                        <AdminSettings />
                       </AdminLayout>
                     </RequireRole>
                   } />
