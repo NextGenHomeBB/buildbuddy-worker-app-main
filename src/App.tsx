@@ -63,110 +63,110 @@ const App = () => {
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <OrganizationProvider>
-            <UserSetupProvider>
             <TooltipProvider>
               <Toaster />
               <Sonner />
               <BrowserRouter>
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/signup" element={<SignUp />} />
-                  <Route path="/join-organization" element={<JoinOrganization />} />
-                  <Route path="/today" element={
-                    <RequireAuth>
-                      <Today />
-                    </RequireAuth>
-                  } />
-                  <Route path="/tasks" element={
-                    <RequireAuth>
-                      <Today />
-                    </RequireAuth>
-                  } />
-                  <Route path="/calendar" element={
-                    <RequireAuth>
-                      <Calendar />
-                    </RequireAuth>
-                  } />
-                  <Route path="/projects" element={
-                    <RequireAuth>
-                      <Projects />
-                    </RequireAuth>
-                  } />
-                  <Route path="/projects/:id" element={
-                    <RequireAuth>
-                      <ProjectDetails />
-                    </RequireAuth>
-                  } />
-                  <Route path="/profile" element={
-                    <RequireAuth>
-                      <Profile />
-                    </RequireAuth>
-                  } />
-                  <Route path="/settings" element={
-                    <RequireAuth>
-                      <Settings />
-                    </RequireAuth>
-                  } />
-                  <Route path="/map" element={
-                    <RequireAuth>
-                      <TaskMap />
-                    </RequireAuth>
-                  } />
-                  <Route path="/lists" element={<RequireAuth><ListsHomeScreen /></RequireAuth>} />
-                  <Route path="/lists/:id" element={<RequireAuth><TaskListScreen /></RequireAuth>} />
-                  <Route path="/history" element={<RequireAuth><TaskHistory /></RequireAuth>} />
-                  
-                  {/* Admin Routes */}
-                  <Route path="/admin" element={
-                    <RequireRole allowedRoles={['admin']}>
-                      <AdminLayout>
-                        <AdminDashboard />
-                      </AdminLayout>
-                    </RequireRole>
-                  } />
-                  <Route path="/admin/users" element={
-                    <RequireRole allowedRoles={['admin']}>
-                      <AdminLayout>
-                        <AdminUsers />
-                      </AdminLayout>
-                    </RequireRole>
-                  } />
-                  <Route path="/admin/projects" element={
-                    <RequireRole allowedRoles={['admin']}>
-                      <AdminLayout>
-                        <AdminProjects />
-                      </AdminLayout>
-                    </RequireRole>
-                  } />
-                  <Route path="/admin/reports" element={
-                    <RequireRole allowedRoles={['admin']}>
-                      <AdminLayout>
-                        <AdminReports />
-                      </AdminLayout>
-                    </RequireRole>
-                  } />
-                  <Route path="/admin/time-tracking" element={
-                    <RequireRole allowedRoles={['admin']}>
-                      <AdminLayout>
-                        <AdminTimeTracking />
-                      </AdminLayout>
-                    </RequireRole>
-                  } />
-                  <Route path="/admin/settings" element={
-                    <RequireRole allowedRoles={['admin']}>
-                      <AdminLayout>
-                        <AdminSettings />
-                      </AdminLayout>
-                    </RequireRole>
-                  } />
-                  
-                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
+                <UserSetupProvider>
+                  <Routes>
+                    <Route path="/" element={<Index />} />
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/signup" element={<SignUp />} />
+                    <Route path="/join-organization" element={<JoinOrganization />} />
+                    <Route path="/today" element={
+                      <RequireAuth>
+                        <Today />
+                      </RequireAuth>
+                    } />
+                    <Route path="/tasks" element={
+                      <RequireAuth>
+                        <Today />
+                      </RequireAuth>
+                    } />
+                    <Route path="/calendar" element={
+                      <RequireAuth>
+                        <Calendar />
+                      </RequireAuth>
+                    } />
+                    <Route path="/projects" element={
+                      <RequireAuth>
+                        <Projects />
+                      </RequireAuth>
+                    } />
+                    <Route path="/projects/:id" element={
+                      <RequireAuth>
+                        <ProjectDetails />
+                      </RequireAuth>
+                    } />
+                    <Route path="/profile" element={
+                      <RequireAuth>
+                        <Profile />
+                      </RequireAuth>
+                    } />
+                    <Route path="/settings" element={
+                      <RequireAuth>
+                        <Settings />
+                      </RequireAuth>
+                    } />
+                    <Route path="/map" element={
+                      <RequireAuth>
+                        <TaskMap />
+                      </RequireAuth>
+                    } />
+                    <Route path="/lists" element={<RequireAuth><ListsHomeScreen /></RequireAuth>} />
+                    <Route path="/lists/:id" element={<RequireAuth><TaskListScreen /></RequireAuth>} />
+                    <Route path="/history" element={<RequireAuth><TaskHistory /></RequireAuth>} />
+                    
+                    {/* Admin Routes */}
+                    <Route path="/admin" element={
+                      <RequireRole allowedRoles={['admin']}>
+                        <AdminLayout>
+                          <AdminDashboard />
+                        </AdminLayout>
+                      </RequireRole>
+                    } />
+                    <Route path="/admin/users" element={
+                      <RequireRole allowedRoles={['admin']}>
+                        <AdminLayout>
+                          <AdminUsers />
+                        </AdminLayout>
+                      </RequireRole>
+                    } />
+                    <Route path="/admin/projects" element={
+                      <RequireRole allowedRoles={['admin']}>
+                        <AdminLayout>
+                          <AdminProjects />
+                        </AdminLayout>
+                      </RequireRole>
+                    } />
+                    <Route path="/admin/reports" element={
+                      <RequireRole allowedRoles={['admin']}>
+                        <AdminLayout>
+                          <AdminReports />
+                        </AdminLayout>
+                      </RequireRole>
+                    } />
+                    <Route path="/admin/time-tracking" element={
+                      <RequireRole allowedRoles={['admin']}>
+                        <AdminLayout>
+                          <AdminTimeTracking />
+                        </AdminLayout>
+                      </RequireRole>
+                    } />
+                    <Route path="/admin/settings" element={
+                      <RequireRole allowedRoles={['admin']}>
+                        <AdminLayout>
+                          <AdminSettings />
+                        </AdminLayout>
+                      </RequireRole>
+                    } />
+                    
+                    {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </UserSetupProvider>
               </BrowserRouter>
             </TooltipProvider>
-          </UserSetupProvider>
           </OrganizationProvider>
         </AuthProvider>
       </QueryClientProvider>
