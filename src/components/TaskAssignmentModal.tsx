@@ -71,7 +71,12 @@ export function TaskAssignmentModal({ task, onTaskUpdated }: TaskAssignmentModal
 
     setIsLoading(true)
     try {
-      const { error } = await supabase
+      console.log('🔧 TaskAssignmentModal - Assigning task:', task.id)
+      console.log('🔧 TaskAssignmentModal - Selected worker ID:', selectedWorkerId)
+      console.log('🔧 TaskAssignmentModal - Setting status to: pending')
+      console.log('🔧 TaskAssignmentModal - Setting due_date to:', new Date().toISOString().split('T')[0])
+      
+      const { data, error } = await supabase
         .from('tasks')
         .update({ 
           assigned_to: selectedWorkerId,
@@ -79,6 +84,9 @@ export function TaskAssignmentModal({ task, onTaskUpdated }: TaskAssignmentModal
           due_date: new Date().toISOString().split('T')[0] // Set due date to today
         })
         .eq('id', task.id)
+        .select()
+
+      console.log('🔧 TaskAssignmentModal - Update result:', { data, error })
 
       if (error) throw error
 
@@ -89,7 +97,7 @@ export function TaskAssignmentModal({ task, onTaskUpdated }: TaskAssignmentModal
       setIsOpen(false)
       onTaskUpdated()
     } catch (error) {
-      console.error('Error assigning task:', error)
+      console.error('🔧 TaskAssignmentModal - Error assigning task:', error)
       toast({
         title: 'Error',
         description: 'Failed to assign task',
