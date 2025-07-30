@@ -1,14 +1,25 @@
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Building } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Building, ArrowLeft } from 'lucide-react'
 
 // Simplified Project Details page
 export default function ProjectDetails() {
   const { id } = useParams()
+  const navigate = useNavigate()
   
   return (
     <div className="container mx-auto p-6">
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => navigate('/projects')}
+        className="mb-4"
+      >
+        <ArrowLeft className="h-4 w-4 mr-2" />
+        Back to Projects
+      </Button>
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
